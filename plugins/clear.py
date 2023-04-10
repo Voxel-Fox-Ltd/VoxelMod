@@ -1,7 +1,7 @@
 import novus
-from novus.ext import client, database as db
+from novus.ext import client
 
-from utils import Action, ActionType, create_chat_log, delete_messages
+from utils import delete_messages
 
 
 class Clear(client.Plugin):

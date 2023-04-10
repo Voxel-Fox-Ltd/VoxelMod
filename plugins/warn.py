@@ -48,4 +48,4 @@ class Warn(client.Plugin):
                 reason=reason,
                 moderator_id=interaction.user.id,
             )
-        await interaction.send(f"A warnning has been added to **{user.mention}**.")
+        await interaction.send(f"A warning has been added to **{user.mention}**.")
