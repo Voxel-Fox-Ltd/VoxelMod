@@ -88,17 +88,20 @@ class History(client.Plugin):
             )
 
         # Decide what buttons we want
-        buttons = []
-        if offset == 0:
-            buttons.append(novus.Button(
+        buttons = [
+            novus.Button(
                 label="\N{LEFTWARDS ARROW}",
-                custom_id=f"P_HIST {user_id} {offset - 5}"
-            ))
-        if len(rows) <= 5:
-            buttons.append(novus.Button(
+                custom_id=f"P_HIST {user_id} {offset - 5}",
+            ),
+            novus.Button(
                 label="\N{RIGHTWARDS ARROW}",
                 custom_id=f"P_HIST {user_id} {offset + 5}"
-            ))
+            ),
+        ]
+        if offset == 0:
+            buttons[0].disabled = True
+        if len(rows) <= 5:
+            buttons[-1].disabled = True
 
         # Send message
         components = []
