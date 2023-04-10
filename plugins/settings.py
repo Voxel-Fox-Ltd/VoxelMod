@@ -24,7 +24,7 @@ class Settings(client.Plugin):
         Set the report channel.
         """
 
-        await interaction.defer()
+        await interaction.defer(ephemeral=True)
         assert interaction.guild
         async with db.Database.acquire() as conn:
             await conn.execute(
@@ -49,5 +49,6 @@ class Settings(client.Plugin):
                 channel.id,
             )
         await interaction.send(
-            f"The report channel has been set to **{channel.mention}**."
+            f"The report channel has been set to **{channel.mention}**.",
+            ephemeral=True,
         )
