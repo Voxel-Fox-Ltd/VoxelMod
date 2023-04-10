@@ -4,7 +4,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS guild_settings(
     guild_id BIGINT PRIMARY KEY,
     report_channel_id BIGINT,
-    staff_role_id BIGINT
+    staff_role_id BIGINT,
+    message_channel_id BIGINT
 );
 
 
