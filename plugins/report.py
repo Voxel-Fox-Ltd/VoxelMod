@@ -206,8 +206,15 @@ class Report(client.Plugin):
         assert interaction.message
         current_embed = interaction.message.embeds[0]
         current_embed.color = 0xe621
-        current_embed.add_field("Handled by", interaction.user.mention)
+        _time = novus.utils.utcnow()
+        time = _time.mention
+        relative = _time.format("R")
+        current_embed.add_field(
+            "Handled by",
+            f"{interaction.user.mention}\n{time} ({relative})",
+        )
         await interaction.update(
+            content=None,
             embeds=[current_embed],
             components=None,
         )
