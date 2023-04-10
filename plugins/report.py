@@ -128,7 +128,8 @@ class Report(client.Plugin):
             rows = await conn.fetch(
                 """
                 SELECT
-                    report_channel_id
+                    report_channel_id,
+                    staff_role_id
                 FROM
                     guild_settings
                 WHERE
@@ -138,8 +139,8 @@ class Report(client.Plugin):
                 interaction.guild.id,
             )
 
-        # Spit out into the report channel
-        if not rows:
+        # Get channel ID
+        if not rows or rows[0]["report_channel_id"] is None:
             await interaction.send(
                 (
                     "Your report has been logged, but there is no report "
@@ -148,8 +149,8 @@ class Report(client.Plugin):
                 )
             )
             return
-        report_channel_id = rows[0]["report_channel_id"]
-        channel = novus.Channel.partial(self.bot.state, report_channel_id)
+
+        # Create message content
         fake_message_id = interaction.id
         message_jump_url = f"https://discord.com/channels/{interaction.guild.id}/{channel_id}/{fake_message_id}"
         embed = (
@@ -160,14 +161,39 @@ class Report(client.Plugin):
             .add_field("Reason", reason or ":kaeShrug:", inline=False)
             .add_field("Log Code", log_code or ":kaeShrug:")
         )
-        await channel.send(
-            embeds=[embed],
-            components=[
-                novus.ActionRow([
-                    novus.Button("Handle this report", custom_id="HANDLE_REPORT"),
-                ])
-            ]
-        )
+        content_kwargs = {}
+        if rows[0]["staff_role_id"]:
+            role_id = rows[0]["staff_role_id"]
+            content_kwargs = {"content": f"<@&{role_id}>"}
+
+        # Send report message
+        report_channel_id = rows[0]["report_channel_id"]
+        channel = novus.Channel.partial(self.bot.state, report_channel_id)
+        button = novus.Button("Handle this report", custom_id="HANDLE_REPORT")
+        try:
+            await channel.send(
+                **content_kwargs,
+                embeds=[embed,],
+                components=[novus.ActionRow([button]),]
+            )
+        except novus.Forbidden:
+            return await interaction.send(
+                (
+                    "Your report has been logged, but I'm unable to send "
+                    "messages into the guild's report channel. Please inform a "
+                    "moderator for them to fix this."
+                ),
+                ephemeral=True,
+            )
+        except novus.NotFound:
+            return await interaction.send(
+                (
+                    "Your report has been logged, but the guild's report "
+                    "channel has been deleted. Please inform a moderator for "
+                    "them to fix this."
+                ),
+                ephemeral=True,
+            )
         await interaction.send("Your report has been sent :)", ephemeral=True)
 
     @client.event.filtered_component("HANDLE_REPORT")
@@ -180,7 +206,6 @@ class Report(client.Plugin):
         current_embed = interaction.message.embeds[0]
         current_embed.color = 0xe621
         current_embed.add_field("Handled by", interaction.user.mention)
-
         await interaction.update(
             embeds=[current_embed],
             components=None,
