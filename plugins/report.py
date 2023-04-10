@@ -146,7 +146,8 @@ class Report(client.Plugin):
                     "Your report has been logged, but there is no report "
                     "channel set. Please inform a moderator for them to fix "
                     "this."
-                )
+                ),
+                ephemeral=True,
             )
             return
 
