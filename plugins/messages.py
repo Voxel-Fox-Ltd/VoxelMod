@@ -55,6 +55,9 @@ class MessageHandler(client.Plugin):
         Handle messages being deleted.
         """
 
+        # See if the author is a bot
+        assert not message.author.bot
+
         # See if we have a message logs channel
         assert channel.guild
         async with db.Database.acquire() as conn:
@@ -113,6 +116,9 @@ class MessageHandler(client.Plugin):
         """
         Handle messages being deleted.
         """
+
+        # See if the author is a bot
+        assert not message.author.bot
 
         # See if we should even bother
         if before is None:
