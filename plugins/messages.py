@@ -55,8 +55,9 @@ class MessageHandler(client.Plugin):
         Handle messages being deleted.
         """
 
-        # See if the author is a bot
-        assert not message.author.bot
+        # Make sure the author is not a bot
+        if message.author.bot:
+            return
 
         # See if we have a message logs channel
         assert channel.guild
@@ -117,8 +118,9 @@ class MessageHandler(client.Plugin):
         Handle messages being deleted.
         """
 
-        # See if the author is a bot
-        assert not message.author.bot
+        # Make sure the author is not a bot
+        if message.author.bot:
+            return
 
         # See if we should even bother
         if before is None:
