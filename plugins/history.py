@@ -90,7 +90,7 @@ class History(client.Plugin):
             relative = novus.utils.format_timestamp(timestamp, "R")
             embed.add_field(
                 str(r["id"]),
-                f"`{r['action_type']}` | {timestamp} ({relative})\n{r['reason']}",
+                f"`{r['action_type']}` | {relative}\n{r['reason']}",
                 inline=False,
             )
 
