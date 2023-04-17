@@ -209,7 +209,8 @@ class Report(client.Plugin):
         _time = novus.utils.utcnow()
         time = _time.mention
         relative = _time.format("R")
-        current_embed.add_field(
+        current_embed.insert_field_at(
+            -1,
             "Handled by",
             f"{interaction.user.mention}\n{time} ({relative})",
         )
