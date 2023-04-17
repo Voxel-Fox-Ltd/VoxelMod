@@ -74,7 +74,14 @@ class History(client.Plugin):
                 offset,
             )
         if not rows:
-            return
+            return await interaction.send(
+                (
+                    "**{user}** has no infractions."
+                ).format(
+                    user=f"<@{user_id}>",
+                ),
+                allowed_mentions=novus.AllowedMentions.none(),
+            )
 
         # Make into an embed
         embed = novus.Embed()

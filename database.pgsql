@@ -1,6 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-
 CREATE TABLE IF NOT EXISTS guild_settings(
     guild_id BIGINT PRIMARY KEY,
     report_channel_id BIGINT,
@@ -18,7 +15,7 @@ CREATE TABLE IF NOT EXISTS temporary_ban(
 
 
 CREATE TABLE IF NOT EXISTS actions(
-    id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
     guild_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     action_type TEXT NOT NULL,
