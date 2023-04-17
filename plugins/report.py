@@ -160,7 +160,7 @@ class Report(client.Plugin):
             .add_field("Reportee", f"<@{user_id}>")
             .add_field("Channel", f"<#{channel_id}>")
             .add_field("Reason", reason or ":kaeShrug:", inline=False)
-            .add_field("Log Code", log_code or ":kaeShrug:")
+            .add_field("Log Code", log_code or ":kaeShrug:", inline=False)
         )
         content_kwargs = {}
         if rows[0]["staff_role_id"]:
@@ -213,6 +213,7 @@ class Report(client.Plugin):
             -1,
             "Handled by",
             f"{interaction.user.mention}\n{time} ({relative})",
+            inline=False,
         )
         await interaction.update(
             content=None,
