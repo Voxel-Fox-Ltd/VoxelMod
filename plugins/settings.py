@@ -1,8 +1,47 @@
+from typing import Any
 import novus
 from novus.ext import client, database as db
 
 
 class Settings(client.Plugin):
+
+    @staticmethod
+    async def set_guild_item(column: str, guild_id: int, value: Any) -> None:
+        """
+        Set an item in the database.
+
+        Parameters
+        ----------
+        column : str
+            The name of the column that you want to set the given value to.
+        guild_id : int
+            The ID of the guild that you want to set the data for.
+        value : Any
+            The value that you want to set.
+        """
+
+        async with db.Database.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO
+                    guild_settings
+                    (
+                        guild_id,
+                        {0}
+                    )
+                VALUES
+                    (
+                        $1,
+                        $2
+                    )
+                ON CONFLICT (guild_id)
+                DO UPDATE
+                SET
+                    {0} = excluded.{0}
+                """.format(column),
+                guild_id,
+                value,
+            )
 
     @client.command(
         name="settings channel report",
@@ -26,28 +65,11 @@ class Settings(client.Plugin):
 
         await interaction.defer(ephemeral=True)
         assert interaction.guild
-        async with db.Database.acquire() as conn:
-            await conn.execute(
-                """
-                INSERT INTO
-                    guild_settings
-                    (
-                        guild_id,
-                        report_channel_id
-                    )
-                VALUES
-                    (
-                        $1,
-                        $2
-                    )
-                ON CONFLICT (guild_id)
-                DO UPDATE
-                SET
-                    report_channel_id = excluded.report_channel_id
-                """,
-                interaction.guild.id,
-                channel.id,
-            )
+        await self.set_guild_item(
+            "report_channel_id",
+            interaction.guild.id,
+            channel.id,
+        )
         await interaction.send(
             f"The report channel has been set to **{channel.mention}**.",
             ephemeral=True,
@@ -75,28 +97,11 @@ class Settings(client.Plugin):
 
         await interaction.defer(ephemeral=True)
         assert interaction.guild
-        async with db.Database.acquire() as conn:
-            await conn.execute(
-                """
-                INSERT INTO
-                    guild_settings
-                    (
-                        guild_id,
-                        message_channel_id
-                    )
-                VALUES
-                    (
-                        $1,
-                        $2
-                    )
-                ON CONFLICT (guild_id)
-                DO UPDATE
-                SET
-                    message_channel_id = excluded.message_channel_id
-                """,
-                interaction.guild.id,
-                channel.id,
-            )
+        await self.set_guild_item(
+            "message_channel_id",
+            interaction.guild.id,
+            channel.id,
+        )
         await interaction.send(
             f"The message logs channel has been set to **{channel.mention}**.",
             ephemeral=True,
@@ -123,28 +128,11 @@ class Settings(client.Plugin):
 
         await interaction.defer(ephemeral=True)
         assert interaction.guild
-        async with db.Database.acquire() as conn:
-            await conn.execute(
-                """
-                INSERT INTO
-                    guild_settings
-                    (
-                        guild_id,
-                        staff_role_id
-                    )
-                VALUES
-                    (
-                        $1,
-                        $2
-                    )
-                ON CONFLICT (guild_id)
-                DO UPDATE
-                SET
-                    staff_role_id = excluded.staff_role_id
-                """,
-                interaction.guild.id,
-                role.id
-            )
+        await self.set_guild_item(
+            "staff_role_id",
+            interaction.guild.id,
+            role.id,
+        )
         await interaction.send(
             f"The report channel has been set to **{role.mention}**.",
             allowed_mentions=novus.AllowedMentions.none(),
