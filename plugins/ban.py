@@ -16,7 +16,7 @@ class Ban(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="user",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.user,
                 description="The user who you want to ban.",
             ),
             novus.ApplicationCommandOption(
@@ -114,7 +114,7 @@ class Ban(client.Plugin):
         name="unban",
         options=[
             novus.ApplicationCommandOption(
-                name="user",
+                name="user_id",
                 type=novus.ApplicationOptionType.string,
                 description="The ID of the user that you want to unban.",
             ),
@@ -125,10 +125,14 @@ class Ban(client.Plugin):
     async def unban(
             self,
             interaction: novus.types.CommandI,
-            user: novus.GuildMember) -> None:
+            user_id: str) -> None:
         """
         Unban a member from a guild.
         """
+
+        if not user_id.isdigit():
+            return await interaction.send("That is not a valid user ID.")
+        user_id_int: int = int(user_id)
 
         await interaction.defer()
 
@@ -137,13 +141,13 @@ class Ban(client.Plugin):
             await Action.create(
                 conn,
                 guild_id=interaction.guild.id,
-                user_id=user.id,
+                user_id=user_id_int,
                 action_type=ActionType.UNBAN,
                 moderator_id=interaction.user.id,
             )
 
         fake_guild = novus.Object(interaction.guild.id, state=self.bot.state)
-        success = await self.try_unban(fake_guild, user.id)
+        success = await self.try_unban(fake_guild, user_id_int)
         if not success:
             return await interaction.send("I was unable to unban that user.")
         async with db.Database.acquire() as conn:
@@ -155,10 +159,10 @@ class Ban(client.Plugin):
                     user_id = $1
                     AND guild_id = $2
                 """,
-                user.id,
+                user_id_int,
                 interaction.guild.id,
             )
-        await interaction.send(f"**{user.mention}** has been unbanned.")
+        await interaction.send(f"**<@{user_id_int}>** has been unbanned.")
 
     async def unban_loop_task(self):
         while True:
