@@ -286,9 +286,6 @@ class Report(client.Plugin):
             )
             return
 
-        # Edit message
-        await self.handle_report_message_edit(ctx)
-
     @client.event.filtered_component(r"HANDLE_REPORT_BAN \d+")
     async def handle_quick_ban_report(self, ctx: novus.types.ComponentI):
         """
@@ -328,6 +325,3 @@ class Report(client.Plugin):
                 "I'm missing the relevant permissions to timeout that user."
             )
             return
-
-        # Edit message
-        await self.handle_report_message_edit(ctx)
