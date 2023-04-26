@@ -1,4 +1,4 @@
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 
 import novus
 from novus.ext import client, database as db
@@ -157,7 +157,7 @@ class Report(client.Plugin):
         embed = (
             novus.Embed(color=0xe621_00, description=f"[Jump to a nearby message]({message_jump_url})")
             .add_field("Reporter", interaction.user.mention)
-            .add_field("Reportee", f"<@{user_id}>")
+            .add_field("Possible Rulebreaker", f"<@{user_id}>")
             .add_field("Channel", f"<#{channel_id}>")
             .add_field("Reason", reason or ":kaeShrug:", inline=False)
             .add_field("Log Code", log_code or ":kaeShrug:", inline=False)
@@ -167,15 +167,26 @@ class Report(client.Plugin):
             role_id = rows[0]["staff_role_id"]
             content_kwargs = {"content": f"<@&{role_id}>"}
 
+        # Get buttons
+        components = [
+            novus.ActionRow([
+                novus.Button("Handle report", custom_id="HANDLE_REPORT"),
+            ]),
+            novus.ActionRow([
+                novus.Button("Quick mute (10m)", custom_id=f"HANDLE_REPORT_MUTE {user_id} 600"),
+                novus.Button("Quick mute (1h)", custom_id=f"HANDLE_REPORT_MUTE {user_id} 3600"),
+                novus.Button("Quick ban", custom_id=f"HANDLE_REPORT_BAN {user_id}"),
+            ])
+        ]
+
         # Send report message
         report_channel_id = rows[0]["report_channel_id"]
         channel = novus.Channel.partial(self.bot.state, report_channel_id)
-        button = novus.Button("Handle this report", custom_id="HANDLE_REPORT")
         try:
             await channel.send(
                 **content_kwargs,
                 embeds=[embed,],
-                components=[novus.ActionRow([button]),]
+                components=components,
             )
         except novus.Forbidden:
             return await interaction.send(
@@ -203,6 +214,13 @@ class Report(client.Plugin):
         Handle the "handle report" button being clicked.
         """
 
+        await self.handle_report_message_edit(interaction)
+
+    async def handle_report_message_edit(self, interaction: novus.Interaction[novus.MessageComponentData]):
+        """
+        Handle editing a report message after it has been interacted with.
+        """
+
         assert interaction.message
         current_embed = interaction.message.embeds[0]
         current_embed.color = 0xe621
@@ -215,8 +233,101 @@ class Report(client.Plugin):
             f"{interaction.user.mention}\n{time} ({relative})",
             inline=False,
         )
-        await interaction.update(
-            content=None,
-            embeds=[current_embed],
-            components=None,
+        if interaction._responded:
+            await interaction.edit_original(
+                content=None,
+                embeds=[current_embed],
+                components=None,
+            )
+        else:
+            await interaction.update(
+                content=None,
+                embeds=[current_embed],
+                components=None,
+            )
+
+    @client.event.filtered_component(r"HANDLE_REPORT_MUTE \d+ \d+")
+    async def handle_quick_mute_report(self, ctx: novus.types.ComponentI):
+        """
+        Handle a quick mute button being pressed.
+        """
+
+        _, ban_user_id, seconds_str = ctx.data.custom_id.split(" ")
+        seconds = int(seconds_str)
+        assert ctx.guild
+        fake_user = novus.Object(
+            ban_user_id,
+            state=self.bot.state,
+            guild_id=ctx.guild.id,
         )
+
+        # Get reason from embed
+        assert ctx.message
+        embed = ctx.message.embeds[0]
+        reason: str | None = None
+        for field in embed.fields:
+            if field.name.casefold() == "reason":
+                reason = field.value
+                break
+        if reason is None:
+            reason = "Muted via report"
+
+        # Get duration
+        future = dt.utcnow() + timedelta(seconds=seconds)
+        try:
+            await novus.GuildMember.edit(
+                fake_user,  # pyright: ignore
+                timeout_until=future,
+                reason=reason,
+            )
+        except novus.Forbidden:
+            await ctx.send(
+                "I'm missing the relevant permissions to timeout that user."
+            )
+            return
+
+        # Edit message
+        await self.handle_report_message_edit(ctx)
+
+    @client.event.filtered_component(r"HANDLE_REPORT_BAN \d+")
+    async def handle_quick_ban_report(self, ctx: novus.types.ComponentI):
+        """
+        Handle a quick ban button being pressed.
+        """
+
+        _, ban_user_id, seconds_str = ctx.data.custom_id.split(" ")
+        seconds = int(seconds_str)
+        assert ctx.guild
+        fake_user = novus.Object(
+            ban_user_id,
+            state=self.bot.state,
+            guild_id=ctx.guild.id,
+        )
+
+        # Get reason from embed
+        assert ctx.message
+        embed = ctx.message.embeds[0]
+        reason: str | None = None
+        for field in embed.fields:
+            if field.name.casefold() == "reason":
+                reason = field.value
+                break
+        if reason is None:
+            reason = "Muted via report"
+
+        # Get duration
+        future = dt.utcnow() + timedelta(seconds=seconds)
+        try:
+            await novus.GuildMember.edit(
+                fake_user,  # pyright: ignore
+                timeout_until=future,
+                reason=reason,
+            )
+        except novus.Forbidden:
+            await ctx.send(
+                "I'm missing the relevant permissions to timeout that user."
+            )
+            return
+
+        # Edit message
+        await self.handle_report_message_edit(ctx)

@@ -138,3 +138,31 @@ class Settings(client.Plugin):
             allowed_mentions=novus.AllowedMentions.none(),
             ephemeral=True,
         )
+
+    @client.command(
+        name="settings role tag",
+        options=[
+            novus.ApplicationCommandOption(
+                name="role",
+                type=novus.ApplicationOptionType.role,
+                description="The role for the tag game.",
+            ),
+        ],
+        default_member_permissions=novus.Permissions(manage_guild=True),
+    )
+    async def tag_role_settings(
+            self,
+            ctx: novus.types.CommandI,
+            role: novus.Role) -> None:
+        """
+        Set the tag role.
+        """
+
+        await ctx.defer(ephemeral=True)
+        assert ctx.guild
+        await self.set_guild_item("staff_role_id", ctx.guild.id, role.id)
+        await ctx.send(
+            f"The tag role has been set to **{role.mention}**.",
+            allowed_mentions=novus.AllowedMentions.none(),
+            ephemeral=True,
+        )
