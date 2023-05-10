@@ -171,7 +171,7 @@ class MessageHandler(client.Plugin):
         embeds = [
             novus.Embed(
                 title="Message Edited",
-                color=0x1,
+                color=0x666666,
             ).set_author(
                 name=str(message.author),
                 icon_url=(
@@ -186,12 +186,10 @@ class MessageHandler(client.Plugin):
         ]
         if before:
             embeds.append(novus.Embed(
-                title="Before",
                 color=0x11ee11,
                 description=before.content,
             ))
         embeds.append(novus.Embed(
-            title="After",
             color=0xee11ee,
             description=message.content,
         ))
