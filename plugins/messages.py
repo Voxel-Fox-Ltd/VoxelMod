@@ -1,4 +1,5 @@
 import collections
+from typing import Any
 
 import novus
 from novus.ext import client, database as db
@@ -35,6 +36,55 @@ class MessageHandler(client.Plugin):
             if i.id == message_id:
                 return i
         return None
+
+    @staticmethod
+    def message_to_embed(
+            message: novus.Message,
+            *,
+            channel: novus.abc.Snowflake | None = None,
+            **kwargs: Any) -> novus.Embed:
+        """
+        Convert a message into an embed.
+
+        Parameters
+        ----------
+        message : novus.Message
+            The message that you want to convert.
+        channel : novus.abc.Snowflake | None
+            Whether or not a field should be added to show the channel the
+            message originated from.
+        **kwargs
+            All passed into the embed initializer.
+
+        Returns
+        -------
+        novus.Embed
+            The created embed.
+        """
+
+        e = novus.Embed(
+            description=message.content,
+            **kwargs,
+        ).set_author(
+            name=str(message.author),
+            icon_url=(
+                str(message.author.avatar)
+                if message.author.avatar
+                else None
+            ),
+        )
+        if message.attachments:
+            e.add_field(
+                "Attachments",
+                "\n".join([f"[{i.filename}]({i.url})" for i in message.attachments]),
+                inline=False,
+            )
+        if channel:
+            e.add_field(
+                "Channel",
+                f"<#{channel.id}>",
+            )
+        return e
 
     @client.event.message
     async def on_message(self, message: novus.Message):
@@ -91,20 +141,11 @@ class MessageHandler(client.Plugin):
 
         # Log message to channel
         log_channel = novus.Channel.partial(self.bot.state, log_channel_id)
-        embed = novus.Embed(
+        embed = self.message_to_embed(
+            message,
+            channel=channel,
             title="Message Deleted",
-            description=message.content,
             color=0xee1111,
-        ).set_author(
-            name=str(message.author),
-            icon_url=(
-                str(message.author.avatar)
-                if message.author.avatar
-                else None
-            ),
-        ).add_field(
-            "Channel",
-            channel.mention,
         )
         await log_channel.send(embeds=[embed])
 
