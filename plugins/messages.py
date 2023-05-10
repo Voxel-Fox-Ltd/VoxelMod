@@ -187,12 +187,12 @@ class MessageHandler(client.Plugin):
         if before:
             embeds.append(novus.Embed(
                 title="Before",
-                color=0x11ee11, 
-                content=before.content,
+                color=0x11ee11,
+                description=before.content,
             ))
         embeds.append(novus.Embed(
             title="After",
-            color=0x11ee11,
-            content=message.content,
+            color=0xee11ee,
+            description=message.content,
         ))
         await log_channel.send(embeds=embeds)
