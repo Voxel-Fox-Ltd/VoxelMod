@@ -168,19 +168,31 @@ class MessageHandler(client.Plugin):
 
         # Log message to channel
         log_channel = novus.Channel.partial(self.bot.state, log_channel_id)
-        embed = novus.Embed(
-            title="Message Edited",
-            description=before.content,
+        embeds = [
+            novus.Embed(
+                title="Message Edited",
+                color=0x1,
+            ).set_author(
+                name=str(message.author),
+                icon_url=(
+                    str(message.author.avatar)
+                    if message.author.avatar
+                    else None
+                ),
+            ).add_field(
+                "Channel",
+                f"{channel.mention} ([jump to message]({message.jump_url}))",
+            )
+        ]
+        if before:
+            embeds.append(novus.Embed(
+                title="Before",
+                color=0x11ee11, 
+                content=before.content,
+            ))
+        embeds.append(novus.Embed(
+            title="After",
             color=0x11ee11,
-        ).set_author(
-            name=str(message.author),
-            icon_url=(
-                str(message.author.avatar)
-                if message.author.avatar
-                else None
-            ),
-        ).add_field(
-            "Channel",
-            f"{channel.mention} ([jump to message]({message.jump_url}))",
-        )
-        await log_channel.send(embeds=[embed])
+            content=message.content,
+        ))
+        await log_channel.send(embeds=embeds)

@@ -151,7 +151,7 @@ class Ban(client.Plugin):
         if not success:
             return await interaction.send("I was unable to unban that user.")
         async with db.Database.acquire() as conn:
-            rows = await conn.fetch(
+            await conn.fetch(
                 """
                 DELETE FROM
                     temporary_bans
