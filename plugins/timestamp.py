@@ -29,8 +29,10 @@ class Timestamp(client.Plugin):
             interaction: novus.types.CommandI,
             time: str) -> None:
         """
-        Sends a well-formatted Discord timestamp message
+        Sends a well-formatted Discord timestamp message.
+        """
 
+        """
         The time string is made up of two parts: y/m/d and h:m
 
         Year can either be 2 digits (20yy) or 4 ditits (yyyy)
