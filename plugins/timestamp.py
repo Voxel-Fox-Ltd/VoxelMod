@@ -16,19 +16,18 @@ class Timestamp(client.Plugin):
                 description="The time to convert ((yy)yy/mm/dd) (hh:mm)",
                 required=True,
             ),  
-            novus.ApplicationCommandOption(
-                name="timezone",
-                type=novus.ApplicationOptionType.string,
-                description="The timezone of the provided timestamp",
-                required=False,
-            ),
+            # novus.ApplicationCommandOption(
+            #     name="timezone",
+            #     type=novus.ApplicationOptionType.string,
+            #     description="The timezone of the provided timestamp",
+            #     required=False,
+            # ),
         ],
     )
     async def timestamp(
             self,
             interaction: novus.types.CommandI,
-            time: str,
-            timezone: str = 'utc') -> None:
+            time: str) -> None:
         """
         Sends a well-formatted Discord timestamp message
 
