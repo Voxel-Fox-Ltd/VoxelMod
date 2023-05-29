@@ -183,7 +183,11 @@ class Timestamp(client.Plugin):
             month=default(month, created_time.month),
             day=default(day, created_time.day),
             hour=default(hour, created_time.hour),
-            minute=default(minute, created_time.minute),
+            minute=(
+                minute if minute is not None
+                else 0 if hour is not None
+                else created_time.minute
+            ),
             second=0,
             microsecond=0,
             tzinfo=tz_object,
