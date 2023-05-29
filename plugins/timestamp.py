@@ -163,13 +163,15 @@ class Timestamp(client.Plugin):
             day: int | None = None,
             hour: int | None = None,
             minute: int | None = None,
-            timezone: str = "UTC") -> None:
+            timezone: str | None = None) -> None:
         """
         Sends a well-formatted Discord timestamp message.
         """
 
         # Get timezone so we can say if the timezone is valid
-        if (tz_object := self.get_timezone_from_string(timezone)) is None:
+        if timezone is None:
+            tz_object = None
+        elif (tz_object := self.get_timezone_from_string(timezone)) is None:
             return await ctx.send(
                 f"The timezone `{timezone}` is not valid.",
                 ephemeral=True,
