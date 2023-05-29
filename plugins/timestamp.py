@@ -100,6 +100,7 @@ class Timestamp(client.Plugin):
                 description="The year of the given datetime.",
                 min_value=2_000,
                 max_value=3_000,
+                required=False,
             ),
             novus.ApplicationCommandOption(
                 name="month",
@@ -119,6 +120,7 @@ class Timestamp(client.Plugin):
                     novus.ApplicationCommandChoice("November", 11),
                     novus.ApplicationCommandChoice("December", 12),
                 ],
+                required=False,
             ),
             novus.ApplicationCommandOption(
                 name="day",
@@ -126,6 +128,7 @@ class Timestamp(client.Plugin):
                 description="The day of the given datetime.",
                 min_value=1,
                 max_value=31,
+                required=False,
             ),
             novus.ApplicationCommandOption(
                 name="hour",
@@ -133,6 +136,7 @@ class Timestamp(client.Plugin):
                 description="The hour of the given datetime, in 24 hour (military) time.",
                 min_value=0,
                 max_value=23,
+                required=False,
             ),
             novus.ApplicationCommandOption(
                 name="minute",
@@ -140,11 +144,13 @@ class Timestamp(client.Plugin):
                 description="The minute of the given datetime.",
                 min_value=0,
                 max_value=59,
+                required=False,
             ),
             novus.ApplicationCommandOption(
                 name="timezone",
                 type=novus.ApplicationOptionType.string,
                 description="The timezone of the provided timestamp",
+                required=False,
             ),
         ],
     )
