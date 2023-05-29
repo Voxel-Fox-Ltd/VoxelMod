@@ -178,7 +178,7 @@ class Timestamp(client.Plugin):
             )
 
         # The default values for each datetime attribute is the current time
-        now = dt.utcnow()
+        now = dt.utcnow().replace(tzinfo=pytz.utc)
         default = lambda a, b: a if a is not None else b
         created_time = dt(
             year=default(year, now.year),
