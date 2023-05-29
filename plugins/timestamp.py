@@ -79,8 +79,8 @@ class Timestamp(client.Plugin):
             # Europe
             "GMT": pytz.timezone("Europe/London"),
             "BST": pytz.timezone("Europe/London"),
-            "CET": pytz.timezone("Brussels"),
-            "CEST": pytz.timezone("Brussels"),
+            "CET": pytz.timezone("Europe/Brussels"),
+            "CEST": pytz.timezone("Europe/Brussels"),
 
             # Africa
             # Asia
