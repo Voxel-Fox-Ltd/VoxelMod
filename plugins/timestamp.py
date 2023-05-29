@@ -176,17 +176,17 @@ class Timestamp(client.Plugin):
             )
 
         # The default values for each datetime attribute is the current time
-        created_time = dt.utcnow()
+        now = dt.utcnow()
         default = lambda a, b: a if a is not None else b
-        created_time = created_time.replace(
-            year=default(year, created_time.year),
-            month=default(month, created_time.month),
-            day=default(day, created_time.day),
-            hour=default(hour, created_time.hour),
+        created_time = dt(
+            year=default(year, now.year),
+            month=default(month, now.month),
+            day=default(day, now.day),
+            hour=default(hour, now.hour),
             minute=(
                 minute if minute is not None
                 else 0 if hour is not None
-                else created_time.minute
+                else now.minute
             ),
             second=0,
             microsecond=0,
