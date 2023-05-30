@@ -3,7 +3,7 @@ import re
 
 import novus
 from novus.ext import client
-import pytz
+from dateutil import tz
 
 
 class Timestamp(client.Plugin):
@@ -14,7 +14,7 @@ class Timestamp(client.Plugin):
         Try and work out a timezone from an input string, in given priority
         order:
 
-        * See if the string is a TZ name
+        * TODO See if the string is a TZ name
         * See if the string is in form UTC+XX:YY
         * See if the string is one of our common locations
             * US states
@@ -23,12 +23,12 @@ class Timestamp(client.Plugin):
         * Fallback to null
         """
 
-        # TZ names
-        if timezone_name in pytz.common_timezones:
-            if timezone_name.casefold() == "GMT":
-                pass
-            else:
-                return pytz.timezone(timezone_name)
+        # # TZ names
+        # if timezone_name in pytz.common_timezones:
+        #     if timezone_name.casefold() == "GMT":
+        #         pass
+        #     else:
+        #         return tz.gettz(timezone_name)
 
         # UTC offsets
         match = re.search(
@@ -50,37 +50,37 @@ class Timestamp(client.Plugin):
 
         # Common acronyms
         acronyms = {
-            "UTC": pytz.utc,
+            "UTC": tz.UTC,
 
             # Australia
-            "ACST": pytz.timezone("Australia/Adelaide"),
-            "ACST": pytz.timezone("Australia/Adelaide"),
-            "ACT": pytz.timezone("Australia/Adelaide"),
-            "AEST": pytz.timezone("Australia/Melbourne"),
-            "AEDT": pytz.timezone("Australia/Melbourne"),
-            "AET": pytz.timezone("Australia/Melbourne"),
-            "AWST": pytz.timezone("Australia/Perth"),
-            "AWDT": pytz.timezone("Australia/Perth"),
+            "ACST": tz.gettz("Australia/Adelaide"),
+            "ACST": tz.gettz("Australia/Adelaide"),
+            "ACT": tz.gettz("Australia/Adelaide"),
+            "AEST": tz.gettz("Australia/Melbourne"),
+            "AEDT": tz.gettz("Australia/Melbourne"),
+            "AET": tz.gettz("Australia/Melbourne"),
+            "AWST": tz.gettz("Australia/Perth"),
+            "AWDT": tz.gettz("Australia/Perth"),
 
             # America
-            "ET": pytz.timezone("America/New_York"),
-            "EST": pytz.timezone("America/New_York"),
-            "EDT": pytz.timezone("America/New_York"),
-            "CT": pytz.timezone("America/Chicago"),
-            "CST": pytz.timezone("America/Chicago"),
-            "CDT": pytz.timezone("America/Chicago"),
-            "MT": pytz.timezone("America/Phoenix"),
-            "MST": pytz.timezone("America/Phoenix"),
-            "MDT": pytz.timezone("America/Phoenix"),
-            "PT": pytz.timezone("America/Los_Angeles"),
-            "PST": pytz.timezone("America/Los_Angeles"),
-            "PDT": pytz.timezone("America/Los_Angeles"),
+            "ET": tz.gettz("America/New_York"),
+            "EST": tz.gettz("America/New_York"),
+            "EDT": tz.gettz("America/New_York"),
+            "CT": tz.gettz("America/Chicago"),
+            "CST": tz.gettz("America/Chicago"),
+            "CDT": tz.gettz("America/Chicago"),
+            "MT": tz.gettz("America/Phoenix"),
+            "MST": tz.gettz("America/Phoenix"),
+            "MDT": tz.gettz("America/Phoenix"),
+            "PT": tz.gettz("America/Los_Angeles"),
+            "PST": tz.gettz("America/Los_Angeles"),
+            "PDT": tz.gettz("America/Los_Angeles"),
 
             # Europe
-            "GMT": pytz.timezone("Europe/London"),
-            "BST": pytz.timezone("Europe/London"),
-            "CET": pytz.timezone("Europe/Brussels"),
-            "CEST": pytz.timezone("Europe/Brussels"),
+            "GMT": tz.gettz("Europe/London"),
+            "BST": tz.gettz("Europe/London"),
+            "CET": tz.gettz("Europe/Brussels"),
+            "CEST": tz.gettz("Europe/Brussels"),
 
             # Africa
             # Asia
