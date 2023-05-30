@@ -195,5 +195,4 @@ class Timestamp(client.Plugin):
             tzinfo=tz_object,
         )
         timestamp: str = str(int(created_time.timestamp()))
-        debug_str = f"`{created_time!r}` - `{tz_object!r}`"
-        await ctx.send(f"<t:{timestamp}> (`<t:{timestamp}>`)\n{debug_str}")
+        await ctx.send(f"<t:{timestamp}> (`<t:{timestamp}>`)")
