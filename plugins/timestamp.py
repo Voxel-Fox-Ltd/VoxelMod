@@ -170,7 +170,7 @@ class Timestamp(client.Plugin):
 
         # Get timezone so we can say if the timezone is valid
         if timezone is None:
-            tz_object = None
+            tz_object = pytz.utc
         elif (tz_object := self.get_timezone_from_string(timezone)) is None:
             return await ctx.send(
                 f"The timezone `{timezone}` is not valid.",
@@ -178,7 +178,7 @@ class Timestamp(client.Plugin):
             )
 
         # The default values for each datetime attribute is the current time
-        now = dt.utcnow().replace(tzinfo=pytz.utc)
+        now = dt.utcnow().replace(tzinfo=pytz.utc).astimezone(tz_object)
         default = lambda a, b: a if a is not None else b
         created_time = dt(
             year=default(year, now.year),
@@ -194,5 +194,6 @@ class Timestamp(client.Plugin):
             microsecond=0,
             tzinfo=tz_object,
         )
-        timestamp: str = format(created_time.timestamp(), ".0f")
-        await ctx.send(f"<t:{timestamp}> (`<t:{timestamp}>`)")
+        timestamp: str = str(int(created_time.timestamp()))
+        debug_str = f"`{created_time!r}` - `{tz_object!r}`"
+        await ctx.send(f"<t:{timestamp}> (`<t:{timestamp}>`)\n{debug_str}")
