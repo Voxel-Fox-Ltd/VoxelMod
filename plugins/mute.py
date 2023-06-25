@@ -84,6 +84,7 @@ class Mute(client.Plugin):
                 action_type=ActionType.MUTE,
                 reason=reason,
                 moderator_id=interaction.user.id,
+                log_code=log_code
             )
 
         # Send a confirmation message

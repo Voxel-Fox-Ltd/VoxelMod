@@ -106,6 +106,7 @@ class Action:
             user_id: int,
             action_type: ActionType,
             moderator_id: int,
+            log_code: str | None = None,
             reason: str | None = None,
             timestamp: novus.utils.DiscordDatetime | None = None) -> Action:
         """
@@ -138,12 +139,13 @@ class Action:
             """
             INSERT INTO
                 actions
-                (
+                (  
                     guild_id,
                     user_id,
                     action_type,
-                    reason,
                     moderator_id,
+                    log_code,
+                    reason,
                     timestamp
                 )
             VALUES
@@ -153,7 +155,8 @@ class Action:
                     $3,
                     $4,
                     $5,
-                    $6
+                    $6,
+                    $7
                 )
             RETURNING
                 *
@@ -161,8 +164,9 @@ class Action:
             guild_id,
             user_id,
             action_type.name,
-            reason or None,
             moderator_id,
+            log_code or None,
+            reason or None,
             timestamp.naive if timestamp else novus.utils.utcnow().naive,
         )
 

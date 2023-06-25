@@ -122,6 +122,7 @@ class Report(client.Plugin):
                 action_type=ActionType.REPORT,
                 reason=reason,
                 moderator_id=interaction.user.id,
+                log_code=log_code
             )
 
             # Get the report channel ID

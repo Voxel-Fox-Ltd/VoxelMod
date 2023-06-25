@@ -47,5 +47,6 @@ class Warn(client.Plugin):
                 action_type=ActionType.WARN,
                 reason=reason,
                 moderator_id=interaction.user.id,
+                log_code=log_code
             )
         await interaction.send(f"A warning has been added to **{user.mention}**.")

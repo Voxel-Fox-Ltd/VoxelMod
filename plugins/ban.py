@@ -82,6 +82,7 @@ class Ban(client.Plugin):
                 action_type=ActionType.BAN,
                 reason=reason,
                 moderator_id=interaction.user.id,
+                log_code=log_code
             )
             if future is not None:
                 await conn.execute(
