@@ -65,6 +65,7 @@ class Payments(client.Plugin):
                 purchases.product_id = checkout_items.id
             WHERE
                 user_id = $1
+                AND expiry_time > TIMEZONE('UTC', NOW())
             ORDER BY
                 purchases.timestamp DESC
             """,
@@ -79,17 +80,18 @@ class Payments(client.Plugin):
         for r in purchase_rows:
             ts = novus.utils.parse_timestamp(r['timestamp'])
             lines = [
-                f"* **ID**: {r['id']}",
-                f"* **Identifier**: {r['identifier']}",
-                f"* **Guild ID**: {r['discord_guild_id']}",
-                f"* **Timestamp**: {ts.format(novus.TimestampFormat.long_datetime)}",
+                f"* **ID**\n\t* `{r['id']}`",
+                f"* **Identifier**\n\t* `{r['identifier']}`",
+                f"* **Guild ID**\n\t* `{r['discord_guild_id']}`",
+                f"* **Timestamp**\n\t* {ts.format(novus.TimestampFormat.long_datetime)}",
             ]
             if r["cancel_url"] or r["expiry_time"]:
-                lines.extend([
-                    f"* **Cancel URL**: [Link]({r['cancel_url']})",
-                    f"* **Expiry**: {r['expiry_time']}",
-                ])
-            purchases_embed.add_field(r["product_name"], "\n".join(lines))
+                if r["expiry_time"]:
+                    ts = novus.utils.parse_timestamp(r['expiry_time'])
+                    lines.append(f"* **Subscription expiry**\n\t* {ts.format('R')}")
+                else:
+                    lines.append(f"* **Subscription expiry**\n\t* N/A")
+            purchases_embed.add_field(r["product_name"], "\n".join(lines), inline=False)
         return await ctx.send(embeds=[
             user_embed,
             purchases_embed,
