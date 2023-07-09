@@ -65,7 +65,10 @@ class Payments(client.Plugin):
                 purchases.product_id = checkout_items.id
             WHERE
                 user_id = $1
-                AND expiry_time > TIMEZONE('UTC', NOW())
+                AND (
+                    expiry_time IS NULL
+                    OR expiry_time <= TIMEZONE('UTC', NOW())
+                )
             ORDER BY
                 purchases.timestamp DESC
             """,
