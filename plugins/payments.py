@@ -42,8 +42,8 @@ class Payments(client.Plugin):
         user_row = user_rows[0]
         user_embed = (
             novus.Embed(title="Voxel Fox account info")
-            .add_field("ID", (user_id := user_row["id"]))
-            .add_field("Discord ID", user_row["discord_user_id"])
+            .add_field("ID", str(user_id := user_row["id"]))
+            .add_field("Discord ID", str(user_row["discord_user_id"]))
         )
 
         # Get their purchases
