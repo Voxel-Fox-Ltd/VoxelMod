@@ -33,9 +33,9 @@ class Payments(client.Plugin):
             FROM
                 users
             WHERE
-                discord_user_id = $1::TEXT
+                discord_user_id = $1
             """,
-            user.id,
+            str(user.id),
         )
         if not user_rows:
             return await ctx.send(f"{user.mention} does not have a VFL account.")
