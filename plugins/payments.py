@@ -83,12 +83,12 @@ class Payments(client.Plugin):
         for r in purchase_rows:
             ts = novus.utils.parse_timestamp(r['timestamp'])
             lines = [
-                f"* **ID**\n  `{r['id']}`",
+                f"* **ID**\n  {r['id']}",
                 f"* **Timestamp**\n  {ts.format(novus.TimestampFormat.long_datetime)}",
-                f"* **Identifier**\n  `{r['identifier']}`",
+                f"* **Identifier**\n  {r['identifier']}",
             ]
             if r["discord_guild_id"]:
-                lines.append(f"* **Guild ID**\n  `{r['discord_guild_id']}`",)
+                lines.append(f"* **Guild ID**\n  {r['discord_guild_id']}",)
             if r["cancel_url"] or r["expiry_time"]:
                 if r["expiry_time"]:
                     ts = novus.utils.parse_timestamp(r['expiry_time'])
