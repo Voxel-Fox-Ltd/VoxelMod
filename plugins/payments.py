@@ -82,10 +82,13 @@ class Payments(client.Plugin):
         purchases_embed = novus.Embed(title="Purchases")
         for r in purchase_rows:
             ts = novus.utils.parse_timestamp(r['timestamp'])
+            identifier = r['identifier']
+            if identifier.startswith("sub_"):
+                identifier = f"[{identifier}](https://dashboard.stripe.com/subscriptions/{identifier})"
             lines = [
                 f"* **ID**\n  {r['id']}",
                 f"* **Timestamp**\n  {ts.format(novus.TimestampFormat.long_datetime)}",
-                f"* **Identifier**\n  {r['identifier']}",
+                f"* **Identifier**\n  {identifier}",
             ]
             if r["discord_guild_id"]:
                 lines.append(f"* **Guild ID**\n  {r['discord_guild_id']}",)
