@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS guild_settings(
 );
 
 
-CREATE TABLE IF NOT EXISTS temporary_ban(
+CREATE TABLE IF NOT EXISTS temporary_bans(
     guild_id BIGINT,
     user_id BIGINT,
     expiry_time TIMESTAMP,
