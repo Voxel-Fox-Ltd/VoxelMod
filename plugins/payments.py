@@ -77,14 +77,19 @@ class Payments(client.Plugin):
             ])
         purchases_embed = novus.Embed(title="Purchases")
         for r in purchase_rows:
-            purchases_embed.add_field(r["product_name"], "\n".join([
+            ts = novus.utils.parse_timestamp(r['timestamp'])
+            lines = [
                 f"* **ID**: {r['id']}",
                 f"* **Identifier**: {r['identifier']}",
                 f"* **Guild ID**: {r['discord_guild_id']}",
-                f"* **Cancel URL**: {r['cancel_url']}",
-                f"* **Expiry**: {r['expiry_time']}",
-                f"* **Timestamp**: {r['timestamp']}",
-            ]))
+                f"* **Timestamp**: {ts.format(novus.TimestampFormat.long_datetime)}",
+            ]
+            if r["cancel_url"] or r["expiry_time"]:
+                lines.extend([
+                    f"* **Cancel URL**: [Link]({r['cancel_url']})",
+                    f"* **Expiry**: {r['expiry_time']}",
+                ])
+            purchases_embed.add_field(r["product_name"], "\n".join(lines))
         return await ctx.send(embeds=[
             user_embed,
             purchases_embed,
