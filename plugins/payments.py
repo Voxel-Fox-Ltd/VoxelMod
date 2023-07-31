@@ -7,7 +7,11 @@ from novus.ext import client
 
 class Payments(client.Plugin):
 
+    async def get_connection(self) -> asyncpg.Connection:
+        return await asyncpg.connect(self.bot.config.vfl_database_dsn)
+
     @client.command(
+        name="purchases list",
         options=[
             novus.ApplicationCommandOption(
                 name="user",
@@ -19,13 +23,13 @@ class Payments(client.Plugin):
         default_member_permissions=novus.Permissions(manage_channels=True),
         guild_ids=[208895639164026880,],
     )
-    async def purchases(self, ctx: novus.types.CommandI, user: novus.User):
+    async def purchases_list(self, ctx: novus.types.CommandI, user: novus.User):
         """
         Get the purchases for a given user.
         """
 
         # Get the user from the database
-        conn: asyncpg.Connection = await asyncpg.connect(self.bot.config.vfl_database_dsn)
+        conn = await self.get_connection()
         user_rows = await conn.fetch(
             """
             SELECT
@@ -45,6 +49,9 @@ class Payments(client.Plugin):
             .add_field("ID", str(user_id := user_row["id"]))
             .add_field("Discord ID", str(user_row["discord_user_id"]))
         )
+        if (suid := user_row["stripe_customer_id"]):
+            url = f"https://dashboard.stripe.com/customers/{suid}"
+            user_embed.add_field("Stripe ID", f"[{suid}]({url})")
 
         # Get their purchases
         purchase_rows = await conn.fetch(
@@ -65,10 +72,6 @@ class Payments(client.Plugin):
                 purchases.product_id = checkout_items.id
             WHERE
                 user_id = $1
-                -- AND (
-                --     expiry_time IS NULL
-                --     OR expiry_time <= TIMEZONE('UTC', NOW())
-                -- )
             ORDER BY
                 purchases.timestamp DESC
             """,
@@ -103,5 +106,4 @@ class Payments(client.Plugin):
             user_embed,
             purchases_embed,
         ])
-
 
