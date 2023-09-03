@@ -127,13 +127,13 @@ class History(client.Plugin):
 
         await interaction.defer()
         async with db.Database.acquire() as conn:
-            log_code = await create_chat_log(conn, interaction.channel)
+            log_id = await create_chat_log(conn, interaction.channel)
 
         # TODO website stuff
 
         await interaction.send(
             "Created a chat log with code {0}"
-            .format(log_code)
+            .format(log_id)
         )
 
         ...

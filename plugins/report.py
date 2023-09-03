@@ -21,12 +21,12 @@ class Report(client.Plugin):
         """
 
         async with db.Database.acquire() as conn:
-            log_code = await create_chat_log(conn, message.channel)
+            log_id = await create_chat_log(conn, message.channel)
         await interaction.send_modal(
             title="Message Report",
             custom_id=(
                 f"MESSAGE_REPORT "
-                f"{log_code} "
+                f"{log_id} "
                 f"{message.author.id} "
                 f"{message.channel.id}"
             ),
@@ -50,7 +50,7 @@ class Report(client.Plugin):
         Listen for message report modals being submitted.
         """
 
-        _, log_code, user_id, channel_id = (
+        _, log_id, user_id, channel_id = (
             interaction.data.custom_id.split(" ")
         )
         component: novus.TextInput = interaction.data[0][0]  # pyright: ignore
@@ -59,7 +59,7 @@ class Report(client.Plugin):
             interaction,
             int(user_id),
             int(channel_id),
-            log_code,
+            log_id,
             reason,
         )
 
@@ -91,13 +91,13 @@ class Report(client.Plugin):
         await interaction.defer(ephemeral=True)
 
         async with db.Database.acquire() as conn:
-            log_code = await create_chat_log(conn, interaction.channel)
+            log_id = await create_chat_log(conn, interaction.channel)
 
         await self.handle_report(
             interaction,
             user.id,
             interaction.channel.id,
-            log_code,
+            log_id,
             reason,
         )
 
@@ -106,7 +106,7 @@ class Report(client.Plugin):
             interaction: novus.Interaction,
             user_id: int,
             channel_id: int,
-            log_code: str | None,
+            log_id: str | None,
             reason: str | None):
         """
         Handle a report submission from any given input.
@@ -122,7 +122,7 @@ class Report(client.Plugin):
                 action_type=ActionType.REPORT,
                 reason=reason,
                 moderator_id=interaction.user.id,
-                log_code=log_code
+                log_id=log_id
             )
 
             # Get the report channel ID
@@ -161,7 +161,7 @@ class Report(client.Plugin):
             .add_field("Possible Rulebreaker", f"<@{user_id}>")
             .add_field("Channel", f"<#{channel_id}>")
             .add_field("Reason", reason or ":kaeShrug:", inline=False)
-            .add_field("Log Code", log_code or ":kaeShrug:", inline=False)
+            .add_field("Log Code", log_id or ":kaeShrug:", inline=False)
         )
         content_kwargs = {}
         if rows[0]["staff_role_id"]:

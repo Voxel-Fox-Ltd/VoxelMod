@@ -35,7 +35,7 @@ class Warn(client.Plugin):
 
         await interaction.defer()
         async with db.Database.acquire() as conn:
-            log_code = await create_chat_log(conn, interaction.channel)  # pyright: ignore
+            log_id = await create_chat_log(conn, interaction.channel)  # pyright: ignore
 
         # Create an action for the infraction
         assert interaction.guild
@@ -47,6 +47,6 @@ class Warn(client.Plugin):
                 action_type=ActionType.WARN,
                 reason=reason,
                 moderator_id=interaction.user.id,
-                log_code=log_code
+                log_id=log_id
             )
         await interaction.send(f"A warning has been added to **{user.mention}**.")

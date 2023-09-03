@@ -106,7 +106,7 @@ class Action:
             user_id: int,
             action_type: ActionType,
             moderator_id: int,
-            log_code: str | None = None,
+            log_id: str | None = None,
             reason: str | None = None,
             timestamp: novus.utils.DiscordDatetime | None = None) -> Action:
         """
@@ -144,7 +144,7 @@ class Action:
                     user_id,
                     action_type,
                     moderator_id,
-                    log_code,
+                    log_id,
                     reason,
                     timestamp
                 )
@@ -165,7 +165,7 @@ class Action:
             user_id,
             action_type.name,
             moderator_id,
-            log_code or None,
+            log_id or None,
             reason or None,
             timestamp.naive if timestamp else novus.utils.utcnow().naive,
         )

@@ -52,7 +52,7 @@ class Mute(client.Plugin):
 
         await interaction.defer()
         async with db.Database.acquire() as conn:
-            log_code = await create_chat_log(conn, interaction.channel)
+            log_id = await create_chat_log(conn, interaction.channel)
 
         # Get duration
         future = dt.utcnow() + get_datetime_until(duration)
@@ -84,7 +84,7 @@ class Mute(client.Plugin):
                 action_type=ActionType.MUTE,
                 reason=reason,
                 moderator_id=interaction.user.id,
-                log_code=log_code
+                log_id=log_id
             )
 
         # Send a confirmation message

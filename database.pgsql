@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS actions(
     action_type TEXT NOT NULL,
     reason TEXT,
     moderator_id BIGINT NOT NULL,
+    log_id UUID,
     timestamp TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS guild_id_user_id_actions ON actions (guild_id, user_id);
