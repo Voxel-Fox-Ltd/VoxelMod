@@ -88,17 +88,19 @@ class Payments(client.Plugin):
             identifier = r['identifier']
             if identifier.startswith("sub_"):
                 identifier = f"[{identifier}](https://dashboard.stripe.com/subscriptions/{identifier})"
+            elif identifier.startswith("in_"):
+                identifier = f"[{identifier}](https://dashboard.stripe.com/invoices/{identifier})"
             lines = [
                 f"* **ID**\n  {r['id']}",
-                f"* **Timestamp**\n  {ts.format(novus.TimestampFormat.long_datetime)}",
-                f"* **Identifier**\n  {identifier}",
+                f"* **Timestamp**\n\u200b  {ts.format(novus.TimestampFormat.long_datetime)}",
+                f"* **Identifier**\n\u200b  {identifier}",
             ]
             if r["discord_guild_id"]:
                 lines.append(f"* **Guild ID**\n  {r['discord_guild_id']}",)
             if r["cancel_url"] or r["expiry_time"]:
                 if r["expiry_time"]:
                     ts = novus.utils.parse_timestamp(r['expiry_time'])
-                    lines.append(f"* **Subscription expiry**\n  {ts.format('R')}")
+                    lines.append(f"* **Subscription expiry**\n\u200b  {ts.format('R')}")
                 else:
                     lines.append(f"* **Subscription expiry**\n  N/A")
             purchases_embed.add_field(r["product_name"], "\n".join(lines), inline=False)
