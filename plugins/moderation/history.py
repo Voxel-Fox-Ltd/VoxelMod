@@ -6,48 +6,48 @@ from utils import create_chat_log
 class History(client.Plugin):
 
     @client.event.filtered_component(r"P_HIST \d+ \d+")
-    async def history_paginator(self, interaction: novus.types.ComponentI):
+    async def history_paginator(self, ctx: novus.types.ComponentI):
         """
         Handle a paginator button being clicked.
         """
 
-        user_id = int(interaction.data.custom_id.split(" ")[1])
-        offset = int(interaction.data.custom_id.split(" ")[2])
-        await self.get_user_history(interaction, user_id, offset)
+        user_id = int(ctx.data.custom_id.split(" ")[1])
+        offset = int(ctx.data.custom_id.split(" ")[2])
+        await self.get_user_history(ctx, user_id, offset)
 
     @client.command(
         name="history",
         options=[
             novus.ApplicationCommandOption(
                 name="user",
-                description="The user that you want to see the history of.",
+                description="The user that you want to see the infraction history of.",
                 type=novus.ApplicationOptionType.USER,
             ),
         ],
     )
     async def history(
             self,
-            interaction: novus.types.CommandI | novus.Interaction[novus.MessageComponentData],
+            ctx: novus.types.CommandI | novus.ctx[novus.MessageComponentData],
             user: novus.GuildMember) -> None:
         """
         Views the full infraction history of a user.
         """
 
-        await self.get_user_history(interaction, user.id)
+        await self.get_user_history(ctx, user.id)
 
     async def get_user_history(
             self,
-            interaction: novus.types.CommandI | novus.Interaction[novus.MessageComponentData],
+            ctx: novus.types.CommandI | novus.ctx[novus.MessageComponentData],
             user_id: int,
             offset: int = 0) -> None:
         """
         Get the history for the user.
         """
 
-        await interaction.defer_update()
+        await ctx.defer_update()
 
         # Get the actions
-        assert interaction.guild
+        assert ctx.guild
         async with db.Database.acquire() as conn:
             rows = await conn.fetch(
                 """
@@ -68,11 +68,11 @@ class History(client.Plugin):
                 OFFSET $3
                 """,
                 user_id,
-                interaction.guild.id,
+                ctx.guild.id,
                 offset,
             )
         if not rows:
-            return await interaction.send(
+            return await ctx.send(
                 (
                     "**{user}** has no infractions."
                 ).format(
@@ -112,24 +112,24 @@ class History(client.Plugin):
         components = []
         if buttons:
             components = [novus.ActionRow(buttons)]
-        await interaction.send(
+        await ctx.send(
             embeds=[embed],
             components=components,
         )
 
     # @client.command(name="logs")
-    # async def logs(self, interaction: novus.types.CommandI) -> None:
+    # async def logs(self, ctx: novus.types.CommandI) -> None:
     #     """
     #     Create and store a chat log.
     #     """
 
-    #     await interaction.defer()
+    #     await ctx.defer()
     #     async with db.Database.acquire() as conn:
-    #         log_id = await create_chat_log(conn, interaction.channel)
+    #         log_id = await create_chat_log(conn, ctx.channel)
 
     #     # TODO website stuff
 
-    #     await interaction.send(
+    #     await ctx.send(
     #         "Created a chat log with code {0}"
     #         .format(log_id)
     #     )
