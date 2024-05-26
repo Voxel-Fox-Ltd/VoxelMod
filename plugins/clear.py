@@ -11,19 +11,19 @@ class Clear(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="user",
-                type=novus.ApplicationOptionType.user,
+                type=novus.ApplicationOptionType.USER,
                 description="The user who you want to clear messages from.",
                 required=False
             ),
             novus.ApplicationCommandOption(
                 name="num_messages",
-                type=novus.ApplicationOptionType.number,
+                type=novus.ApplicationOptionType.NUMBER,
                 description="The number of messages to clear",
                 required=False,
             ),
             novus.ApplicationCommandOption(
                 name="reason",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.STRING,
                 description="The reason for clearing these messages.",
                 required=False,
             ),
@@ -33,7 +33,7 @@ class Clear(client.Plugin):
     )
     async def clear(
             self,
-            interaction: novus.types.CommandI,
+            ctx: novus.types.CommandGI,
             user: novus.GuildMember | None = None,
             num_messages: int = 100,
             reason: str | None = None) -> None:
@@ -41,18 +41,10 @@ class Clear(client.Plugin):
         Clears a number of messages from a user
         """
 
-        await interaction.defer()
-
-        # Create an action for the infraction
-        assert interaction.guild
-
-        await delete_messages(interaction.channel, user, num_messages, reason)
-
-        content = "Cleared last %s messages".format(num_messages)
+        await ctx.defer(ephemeral=True)
+        await delete_messages(ctx.channel, user, num_messages, reason)
+        content = "Cleared last {} messages".format(num_messages)
         if user:
-            content += " from **%s**".format(user.mention)
-
-        await interaction.send(
-            content=content,
-            ephemeral=True
-        )
+            content += " from **{}**".format(user.mention)
+        content += "."
+        await ctx.send(content, ephemeral=True)

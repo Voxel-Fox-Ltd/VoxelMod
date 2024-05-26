@@ -1,7 +1,6 @@
-from typing import cast
 from datetime import datetime as dt
-import asyncio
 import itertools
+from typing import cast
 
 import novus
 from novus.ext import client, database as db
@@ -16,24 +15,24 @@ class Ban(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="user",
-                type=novus.ApplicationOptionType.user,
+                type=novus.ApplicationOptionType.USER,
                 description="The user who you want to ban.",
             ),
             novus.ApplicationCommandOption(
                 name="reason",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.STRING,
                 description="The reason for banning this user.",
                 required=False,
             ),
             novus.ApplicationCommandOption(
                 name="delete_days",
-                type=novus.ApplicationOptionType.number,
+                type=novus.ApplicationOptionType.NUMBER,
                 description="The number of days of messages that you want to delete.",
                 required=False,
             ),
             novus.ApplicationCommandOption(
                 name="duration",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.STRING,
                 description="The amount of time to ban the user for.",
                 required=False,
             ),
@@ -116,7 +115,7 @@ class Ban(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="user_id",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.STRING,
                 description="The ID of the user that you want to unban.",
             ),
         ],
@@ -165,11 +164,7 @@ class Ban(client.Plugin):
             )
         await interaction.send(f"**<@{user_id_int}>** has been unbanned.")
 
-    async def unban_loop_task(self):
-        while True:
-            await self.unban_loop()
-            await asyncio.sleep(60)
-
+    @client.loop(60)
     async def unban_loop(self):
         """
         Loop through any banned users, unbanning them by user ID.

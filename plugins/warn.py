@@ -11,12 +11,12 @@ class Warn(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="user",
-                type=novus.ApplicationOptionType.user,
+                type=novus.ApplicationOptionType.USER,
                 description="The user who you want to warn.",
             ),
             novus.ApplicationCommandOption(
                 name="reason",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.STRING,
                 description="The reason for warning this user.",
                 required=False,
             ),

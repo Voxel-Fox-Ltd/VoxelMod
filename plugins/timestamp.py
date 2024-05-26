@@ -23,13 +23,6 @@ class Timestamp(client.Plugin):
         * Fallback to null
         """
 
-        # # TZ names
-        # if timezone_name in pytz.common_timezones:
-        #     if timezone_name.casefold() == "GMT":
-        #         pass
-        #     else:
-        #         return tz.gettz(timezone_name)
-
         # UTC offsets
         match = re.search(
             r"^utc(?P<direction>[+-])(?P<hour>\d{1,2}(?::(?P<minute>\d{2}))?)$",
@@ -96,7 +89,7 @@ class Timestamp(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="year",
-                type=novus.ApplicationOptionType.integer,
+                type=novus.ApplicationOptionType.INTEGER,
                 description="The year of the given datetime.",
                 min_value=2_000,
                 max_value=3_000,
@@ -104,7 +97,7 @@ class Timestamp(client.Plugin):
             ),
             novus.ApplicationCommandOption(
                 name="month",
-                type=novus.ApplicationOptionType.integer,
+                type=novus.ApplicationOptionType.INTEGER,
                 description="The month of the given datetime.",
                 choices=[
                     novus.ApplicationCommandChoice("January", 1),
@@ -124,7 +117,7 @@ class Timestamp(client.Plugin):
             ),
             novus.ApplicationCommandOption(
                 name="day",
-                type=novus.ApplicationOptionType.integer,
+                type=novus.ApplicationOptionType.INTEGER,
                 description="The day of the given datetime.",
                 min_value=1,
                 max_value=31,
@@ -132,7 +125,7 @@ class Timestamp(client.Plugin):
             ),
             novus.ApplicationCommandOption(
                 name="hour",
-                type=novus.ApplicationOptionType.integer,
+                type=novus.ApplicationOptionType.INTEGER,
                 description="The hour of the given datetime, in 24 hour (military) time.",
                 min_value=0,
                 max_value=23,
@@ -140,7 +133,7 @@ class Timestamp(client.Plugin):
             ),
             novus.ApplicationCommandOption(
                 name="minute",
-                type=novus.ApplicationOptionType.integer,
+                type=novus.ApplicationOptionType.INTEGER,
                 description="The minute of the given datetime.",
                 min_value=0,
                 max_value=59,
@@ -148,7 +141,7 @@ class Timestamp(client.Plugin):
             ),
             novus.ApplicationCommandOption(
                 name="timezone",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.STRING,
                 description="The timezone of the provided timestamp",
                 required=False,
             ),

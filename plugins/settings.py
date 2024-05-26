@@ -48,9 +48,9 @@ class Settings(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="channel",
-                type=novus.ApplicationOptionType.channel,
+                type=novus.ApplicationOptionType.CHANNEL,
                 description="The channel where you want reports to funnel to.",
-                channel_types=[novus.ChannelType.guild_text],
+                channel_types=[novus.ChannelType.GUILD_TEXT],
             ),
         ],
         default_member_permissions=novus.Permissions(manage_guild=True),
@@ -58,7 +58,7 @@ class Settings(client.Plugin):
     async def report_channel_settings(
             self,
             interaction: novus.types.CommandI,
-            channel: novus.GuildTextChannel) -> None:
+            channel: novus.Channel) -> None:
         """
         Set the report channel.
         """
@@ -80,9 +80,9 @@ class Settings(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="channel",
-                type=novus.ApplicationOptionType.channel,
+                type=novus.ApplicationOptionType.CHANNEL,
                 description="The channel where you want message logs to funnel to.",
-                channel_types=[novus.ChannelType.guild_text],
+                channel_types=[novus.ChannelType.GUILD_TEXT],
             ),
         ],
         default_member_permissions=novus.Permissions(manage_guild=True),
@@ -90,7 +90,7 @@ class Settings(client.Plugin):
     async def message_logs_channel_settings(
             self,
             interaction: novus.types.CommandI,
-            channel: novus.GuildTextChannel) -> None:
+            channel: novus.Channel) -> None:
         """
         Set the message logs channel.
         """
@@ -112,7 +112,7 @@ class Settings(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="role",
-                type=novus.ApplicationOptionType.role,
+                type=novus.ApplicationOptionType.ROLE,
                 description="The role that all of staff members have.",
             ),
         ],
@@ -144,7 +144,7 @@ class Settings(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="role",
-                type=novus.ApplicationOptionType.role,
+                type=novus.ApplicationOptionType.ROLE,
                 description="The role for the tag game.",
             ),
         ],

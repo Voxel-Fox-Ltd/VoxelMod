@@ -10,7 +10,7 @@ class Report(client.Plugin):
 
     @client.command(
         name="Report this message.",
-        type=novus.ApplicationCommandType.message,
+        type=novus.ApplicationCommandType.MESSAGE,
     )
     async def report_context_command(
             self,
@@ -35,7 +35,7 @@ class Report(client.Plugin):
                     novus.TextInput(
                         "Why are you reporting this message?",
                         custom_id="...",
-                        style=novus.TextInputStyle.short,
+                        style=novus.TextInputStyle.SHORT,
                         max_length=200,
                     ),
                 ]),
@@ -68,12 +68,12 @@ class Report(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="user",
-                type=novus.ApplicationOptionType.user,
+                type=novus.ApplicationOptionType.USER,
                 description="The user that you want to report.",
             ),
             novus.ApplicationCommandOption(
                 name="reason",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.STRING,
                 description="The reason you are reporting the user.",
             ),
         ]
@@ -89,10 +89,8 @@ class Report(client.Plugin):
         """
 
         await interaction.defer(ephemeral=True)
-
         async with db.Database.acquire() as conn:
             log_id = await create_chat_log(conn, interaction.channel)
-
         await self.handle_report(
             interaction,
             user.id,
@@ -276,8 +274,8 @@ class Report(client.Plugin):
         # Get duration
         future = dt.utcnow() + timedelta(seconds=seconds)
         try:
-            await novus.GuildMember.edit(
-                fake_user,  # pyright: ignore
+            await novus.GuildMember.edit(  # pyright: ignore
+                fake_user,
                 timeout_until=future,
                 reason=reason,
             )
@@ -314,8 +312,8 @@ class Report(client.Plugin):
 
         # Ban the user
         try:
-            await novus.GuildMember.ban(
-                fake_user,  # pyright: ignore
+            await novus.GuildMember.ban(  # pyright: ignore
+                fake_user,
                 reason=reason,
             )
         except novus.Forbidden:

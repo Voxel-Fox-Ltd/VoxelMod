@@ -16,7 +16,7 @@ class Payments(client.Plugin):
             novus.ApplicationCommandOption(
                 name="user",
                 description="The user who you want to check the purchases of.",
-                type=novus.ApplicationOptionType.user,
+                type=novus.ApplicationOptionType.USER,
             ),
         ],
         dm_permission=False,
@@ -92,7 +92,7 @@ class Payments(client.Plugin):
                 identifier = f"[{identifier}](https://dashboard.stripe.com/invoices/{identifier})"
             lines = [
                 f"* **ID**\n  {r['id']}",
-                f"* **Timestamp**\n\u200b  {ts.format(novus.TimestampFormat.long_datetime)}",
+                f"* **Timestamp**\n\u200b  {ts.format(novus.TimestampFormat.LONG_DATETIME)}",
                 f"* **Identifier**\n\u200b  {identifier}",
             ]
             if r["discord_guild_id"]:

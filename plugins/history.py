@@ -1,5 +1,3 @@
-from typing import cast
-
 import novus
 from novus.ext import client, database as db
 
@@ -23,7 +21,7 @@ class History(client.Plugin):
             novus.ApplicationCommandOption(
                 name="user",
                 description="The user that you want to see the history of.",
-                type=novus.ApplicationOptionType.user,
+                type=novus.ApplicationOptionType.USER,
             ),
         ],
     )
@@ -119,21 +117,21 @@ class History(client.Plugin):
             components=components,
         )
 
-    @client.command(name="logs")
-    async def logs(self, interaction: novus.types.CommandI) -> None:
-        """
-        Create and store a chat log.
-        """
+    # @client.command(name="logs")
+    # async def logs(self, interaction: novus.types.CommandI) -> None:
+    #     """
+    #     Create and store a chat log.
+    #     """
 
-        await interaction.defer()
-        async with db.Database.acquire() as conn:
-            log_id = await create_chat_log(conn, interaction.channel)
+    #     await interaction.defer()
+    #     async with db.Database.acquire() as conn:
+    #         log_id = await create_chat_log(conn, interaction.channel)
 
-        # TODO website stuff
+    #     # TODO website stuff
 
-        await interaction.send(
-            "Created a chat log with code {0}"
-            .format(log_id)
-        )
+    #     await interaction.send(
+    #         "Created a chat log with code {0}"
+    #         .format(log_id)
+    #     )
 
-        ...
+    #     ...

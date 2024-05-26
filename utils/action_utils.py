@@ -1,6 +1,3 @@
-# cat/Dora wus here :3c(and hero/george) kae was also here briefly. we coded this actually
-# Kae just got the credit and my comments got deleted ;-; this is catism
-
 from __future__ import annotations
 
 from enum import Enum
@@ -23,7 +20,11 @@ __all__ = (
 )
 
 
+# cat/Dora wus here :3c(and hero/george) kae was also here briefly. we coded this actually
+# Kae just got the credit and my comments got deleted ;-; this is catism
 # I believe in you kae!! -Dowo :3
+
+
 class ActionType(Enum):
     """
     The type of action that was applied.
@@ -230,4 +231,3 @@ async def create_chat_log(
     )
 
     return message_log_id
-

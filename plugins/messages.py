@@ -99,7 +99,6 @@ class MessageHandler(client.Plugin):
     @client.event.message_delete
     async def on_message_delete(
             self,
-            channel: novus.TextChannel,
             message: novus.Message):
         """
         Handle messages being deleted.
@@ -110,7 +109,7 @@ class MessageHandler(client.Plugin):
             return
 
         # See if we have a message logs channel
-        assert channel.guild
+        assert message.channel.guild
         async with db.Database.acquire() as conn:
             rows = await conn.fetch(
                 """
@@ -122,7 +121,7 @@ class MessageHandler(client.Plugin):
                     guild_id = $1
                 LIMIT 1
                 """,
-                channel.guild.id,
+                message.channel.guild.id,
             )
         if not rows or rows[0]["message_channel_id"] is None:
             return
@@ -130,11 +129,11 @@ class MessageHandler(client.Plugin):
 
         # Make sure we have a valid message
         if not isinstance(message, novus.Message):
-            cached_message = self.try_get_message(channel.id, message.id)
+            cached_message = self.try_get_message(message.channel.id, message.id)
             if cached_message is None:
                 self.log.info(
                     "Failed to get message %s-%s from cache",
-                    channel.id, message.id,
+                    message.channel.id, message.id,
                 )
                 return
             message = cached_message
@@ -143,14 +142,14 @@ class MessageHandler(client.Plugin):
         log_channel = novus.Channel.partial(self.bot.state, log_channel_id)
         embed = self.message_to_embed(
             message,
-            channel=channel,
+            channel=message.channel,
             title="Message Deleted",
             color=0xee1111,
         )
         await log_channel.send(embeds=[embed])
 
 
-    @client.event.message_update
+    @client.event.message_edit
     async def on_message_update(
             self,
             before: novus.Message | None,

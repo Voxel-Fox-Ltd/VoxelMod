@@ -1,10 +1,16 @@
-from datetime import datetime as dt, timedelta
+from datetime import datetime as dt
 import asyncio
 
 import novus
 from novus.ext import client, database as db
 
-from utils import Action, ActionType, create_chat_log, get_datetime_until, delete_messages as delete_messages_util
+from utils import (
+    Action,
+    ActionType,
+    create_chat_log,
+    get_datetime_until,
+    delete_messages as delete_messages_util,
+)
 
 
 class Mute(client.Plugin):
@@ -14,24 +20,24 @@ class Mute(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="user",
-                type=novus.ApplicationOptionType.user,
+                type=novus.ApplicationOptionType.USER,
                 description="The user who you want to mute.",
             ),
             novus.ApplicationCommandOption(
                 name="reason",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.STRING,
                 description="The reason for muting this user.",
                 required=False,
             ),
             novus.ApplicationCommandOption(
                 name="duration",
-                type=novus.ApplicationOptionType.string,
+                type=novus.ApplicationOptionType.STRING,
                 description="The amount of time to mute the member for.",
                 required=False,
             ),
             novus.ApplicationCommandOption(
                 name="delete_messages",
-                type=novus.ApplicationOptionType.boolean,
+                type=novus.ApplicationOptionType.BOOLEAN,
                 description="Whether or not you want to delete messages from the user on their mute.",
                 required=False,
             ),
@@ -99,7 +105,7 @@ class Mute(client.Plugin):
         options=[
             novus.ApplicationCommandOption(
                 name="user",
-                type=novus.ApplicationOptionType.user,
+                type=novus.ApplicationOptionType.USER,
                 description="The user who you want to unmute.",
             ),
         ],

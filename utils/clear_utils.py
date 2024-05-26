@@ -6,7 +6,6 @@ from .message_queuer import MaxLenList
 
 if TYPE_CHECKING:
     import novus
-    import asyncpg
 
 __all__ = (
     "delete_messages",
@@ -35,7 +34,7 @@ async def delete_messages(
         """
 
         # Get messages
-        messages = await novus.GuildTextChannel.fetch_messages(channel)  # pyright: ignore
+        messages = await novus.Channel.fetch_messages(channel)  # pyright: ignore
 
         # Filter to only ones sent by the user
         delete_ids: MaxLenList[int] = MaxLenList(num_messages)
@@ -43,18 +42,17 @@ async def delete_messages(
         for last_message in messages:
             if user and last_message.author.id != user.id:
                 continue
-
             delete_ids.append(last_message.id)
 
         # Delete appropriately
-        if not delete_ids: # If there are no messages to delete
-            return
-        elif len(delete_ids) == 1: # If there is just one message to delete
+        if not delete_ids:
+            return  # No messages to delete
+        elif len(delete_ids) == 1:
             assert last_message
-            await last_message.delete(reason=reason)  # pyright: ignore
-        else: # If there are more than one messages to delete
-            await novus.GuildTextChannel.bulk_delete_messages(
+            await last_message.delete(reason=reason)
+        else:
+            await novus.Channel.bulk_delete_messages(
                 channel,
-                delete_ids,  # pyright: ignore
+                delete_ids,
                 reason=reason,
             )
