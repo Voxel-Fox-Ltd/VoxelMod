@@ -293,8 +293,7 @@ class Report(client.Plugin):
         Handle a quick ban button being pressed.
         """
 
-        _, ban_user_id, seconds_str = ctx.data.custom_id.split(" ")
-        seconds = int(seconds_str)
+        _, ban_user_id = ctx.data.custom_id.split(" ")
         assert ctx.guild
         fake_user = novus.Object(
             ban_user_id,
@@ -311,18 +310,16 @@ class Report(client.Plugin):
                 reason = field.value
                 break
         if reason is None:
-            reason = "Muted via report"
+            reason = "Ban via report"
 
-        # Get duration
-        future = dt.utcnow() + timedelta(seconds=seconds)
+        # Ban the user
         try:
-            await novus.GuildMember.edit(
+            await novus.GuildMember.ban(
                 fake_user,  # pyright: ignore
-                timeout_until=future,
                 reason=reason,
             )
         except novus.Forbidden:
             await ctx.send(
-                "I'm missing the relevant permissions to timeout that user."
+                "I'm missing the relevant permissions to ban that user."
             )
             return
