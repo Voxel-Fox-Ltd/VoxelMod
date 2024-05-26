@@ -2,3 +2,4 @@ novus>=1.0.0
 asyncpg
 pyyaml
 python-dateutil
+python-dotenv

@@ -1,6 +1,4 @@
-config.yaml
-config.toml
-config.json
+.env
 .vscode/
 
 # Byte-compiled / optimized / DLL files

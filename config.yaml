@@ -1,0 +1,39 @@
+token: $TOKEN
+pubkey: ''
+shard_count: 1
+shard_ids: null
+intents:
+  auto_moderation_configuration: true
+  auto_moderation_execution: true
+  direct_message_reactions: false
+  direct_message_typing: false
+  direct_messages: false
+  guild_emojis_and_stickers: true
+  guild_integrations: false
+  guild_invites: false
+  guild_members: true
+  guild_message_reactions: true
+  guild_message_typing: false
+  guild_messages: true
+  guild_moderation: true
+  guild_presences: true
+  guild_scheduled_events: false
+  guild_voice_states: true
+  guild_webhooks: false
+  guilds: true
+  message_content: true
+plugins:
+- plugins.payments:Payments
+- plugins.settings:Settings
+- plugins.timestamp:Timestamp
+- plugins.moderation.ban:Ban
+- plugins.moderation.clear:Clear
+- plugins.moderation.history:History
+- plugins.moderation.messages:MessageHandler
+- plugins.moderation.mute:Mute
+- plugins.moderation.report:Report
+- plugins.moderation.warn:Warn
+- novus.ext.database:Database
+database_dsn: $DSN
+vfl_database_dsn: $VFL_DSN
+database_max_connections: 1
