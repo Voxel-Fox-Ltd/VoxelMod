@@ -8,7 +8,7 @@ import uuid
 
 import novus
 
-from plugins.messages import MessageHandler
+from plugins.moderation.messages import MessageHandler
 
 if TYPE_CHECKING:
     import asyncpg
