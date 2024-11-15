@@ -1,34 +1,43 @@
 from __future__ import annotations
 
+import os
+
 import asyncpg
-import novus
+import novus as n
+from novus import types as t
 from novus.ext import client
+import dotenv
+
+
+dotenv.load_dotenv()
 
 
 class Payments(client.Plugin):
+    """
+    For handling Voxel Fox website payment processing.
+    """
 
     async def get_connection(self) -> asyncpg.Connection:
         return await asyncpg.connect(self.bot.config.vfl_database_dsn)
 
     @client.command(
-        name="purchases list",
+        name="purchases list user",
         options=[
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="user",
                 description="The user who you want to check the purchases of.",
-                type=novus.ApplicationOptionType.USER,
+                type=n.ApplicationOptionType.USER,
             ),
         ],
         dm_permission=False,
-        default_member_permissions=novus.Permissions(manage_channels=True),
-        guild_ids=[208895639164026880,],
+        default_member_permissions=n.Permissions(manage_channels=True),
+        guild_ids=[int(os.getenv("MAIN_GUILD_ID", 0))],
     )
-    async def purchases_list(self, ctx: novus.types.CommandI, user: novus.User):
+    async def purchases_list_user(self, ctx: n.types.CommandI, user: n.User):
         """
         Get the purchases for a given user.
         """
 
-        # Get the user from the database
         conn = await self.get_connection()
         user_rows = await conn.fetch(
             """
@@ -42,10 +51,61 @@ class Payments(client.Plugin):
             str(user.id),
         )
         if not user_rows:
+            await conn.close()
             return await ctx.send(f"{user.mention} does not have a VFL account.")
+        return await self.purchases_list_generic(ctx, conn, user_rows)
+
+    @client.command(
+        name="purchases list id",
+        options=[
+            n.ApplicationCommandOption(
+                name="id",
+                description="The VFL ID that you want to check the purchases of.",
+                type=n.ApplicationOptionType.STRING,
+            ),
+        ],
+        dm_permission=False,
+        default_member_permissions=n.Permissions(manage_channels=True),
+        guild_ids=[int(os.getenv("MAIN_GUILD_ID", 0))],
+    )
+    async def purchases_list_id(self, ctx: n.types.CommandI, user: str):
+        """
+        Get the purchases for a given VFL user ID.
+        """
+
+        conn = await self.get_connection()
+        user_rows = await conn.fetch(
+            """
+            SELECT
+                *
+            FROM
+                users
+            WHERE
+                id = $1
+            """,
+            user,
+        )
+        if not user_rows:
+            await conn.close()
+            return await ctx.send(
+                f"There is no VFL account with the ID `{user}`.", 
+                allowed_mentions=n.AllowedMentions.none(),
+            )
+        return await self.purchases_list_generic(ctx, conn, user_rows)
+
+    async def purchases_list_generic(
+            self, 
+            ctx: t.CommandI, 
+            conn: asyncpg.Connection, 
+            user_rows: list[dict]) -> None:
+        """
+        Generic purchase list handling when given rows.
+        """
+
+        # Sort out initial data
         user_row = user_rows[0]
         user_embed = (
-            novus.Embed(title="Voxel Fox account info")
+            n.Embed(title="Voxel Fox account info")
             .add_field("ID", str(user_id := user_row["id"]))
             .add_field("Discord ID", str(user_row["discord_user_id"]))
         )
@@ -77,14 +137,19 @@ class Payments(client.Plugin):
             """,
             user_id,
         )
+        await conn.close()
+
+        # Default for no rows
         if not purchase_rows:
             return await ctx.send(embeds=[
                 user_embed,
-                novus.Embed(title="Purchases", description="None :(")
+                n.Embed(title="Purchases", description="None :(")
             ])
-        purchases_embed = novus.Embed(title="Purchases")
+
+        # Create embed for purchases
+        purchases_embed = n.Embed(title="Purchases")
         for r in purchase_rows:
-            ts = novus.utils.parse_timestamp(r['timestamp'])
+            ts = n.utils.parse_timestamp(r['timestamp'])
             identifier = r['identifier']
             if identifier.startswith("sub_"):
                 identifier = f"[{identifier}](https://dashboard.stripe.com/subscriptions/{identifier})"
@@ -92,18 +157,20 @@ class Payments(client.Plugin):
                 identifier = f"[{identifier}](https://dashboard.stripe.com/invoices/{identifier})"
             lines = [
                 f"* **ID**\n  {r['id']}",
-                f"* **Timestamp**\n\u200b  {ts.format(novus.TimestampFormat.LONG_DATETIME)}",
+                f"* **Timestamp**\n\u200b  {ts.format(n.TimestampFormat.LONG_DATETIME)}",
                 f"* **Identifier**\n\u200b  {identifier}",
             ]
             if r["discord_guild_id"]:
                 lines.append(f"* **Guild ID**\n  {r['discord_guild_id']}",)
             if r["cancel_url"] or r["expiry_time"]:
                 if r["expiry_time"]:
-                    ts = novus.utils.parse_timestamp(r['expiry_time'])
+                    ts = n.utils.parse_timestamp(r['expiry_time'])
                     lines.append(f"* **Subscription expiry**\n\u200b  {ts.format('R')}")
                 else:
                     lines.append(f"* **Subscription expiry**\n  N/A")
             purchases_embed.add_field(r["product_name"], "\n".join(lines), inline=False)
+
+        # Send created embeds
         return await ctx.send(embeds=[
             user_embed,
             purchases_embed,

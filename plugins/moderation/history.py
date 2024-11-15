@@ -3,6 +3,7 @@ from novus.ext import client, database as db
 
 from utils import create_chat_log
 
+
 class History(client.Plugin):
 
     @client.event.filtered_component(r"P_HIST \d+ \d+")
@@ -27,7 +28,7 @@ class History(client.Plugin):
     )
     async def history(
             self,
-            ctx: novus.types.CommandI | novus.ctx[novus.MessageComponentData],
+            ctx: novus.types.CommandI | novus.Interaction[novus.MessageComponentData],
             user: novus.GuildMember) -> None:
         """
         Views the full infraction history of a user.
@@ -37,7 +38,7 @@ class History(client.Plugin):
 
     async def get_user_history(
             self,
-            ctx: novus.types.CommandI | novus.ctx[novus.MessageComponentData],
+            ctx: novus.types.CommandI | novus.Interaction[novus.MessageComponentData],
             user_id: int,
             offset: int = 0) -> None:
         """
