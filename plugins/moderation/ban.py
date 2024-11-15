@@ -201,15 +201,13 @@ class Ban(client.Plugin):
                     *
                 """
             )
-        for guild_rows in itertools.groupby(rows, key=lambda r: r["guild_id"]):
-            guild_id = guild_rows[0]["guild_id"]
+        for row in rows:
+            row = cast(dict[str, int], row)
+            guild_id = row["guild_id"]
             fake_guild = novus.Object(guild_id, state=self.bot.state)
-
-            for row in guild_rows:
-                row = cast(dict[str, int], row)
-                user_id = row["user_id"]
-                if not await self.try_unban(fake_guild, user_id):
-                    break
+            user_id = row["user_id"]
+            if not await self.try_unban(fake_guild, user_id):
+                break
 
     async def try_unban(
             self,
