@@ -68,7 +68,7 @@ class Payments(client.Plugin):
         default_member_permissions=n.Permissions(manage_channels=True),
         guild_ids=[int(os.getenv("MAIN_GUILD_ID", 0))],
     )
-    async def purchases_list_id(self, ctx: n.types.CommandI, user: str):
+    async def purchases_list_id(self, ctx: n.types.CommandI, id: str):
         """
         Get the purchases for a given VFL user ID.
         """
@@ -83,12 +83,12 @@ class Payments(client.Plugin):
             WHERE
                 id = $1
             """,
-            user,
+            id,
         )
         if not user_rows:
             await conn.close()
             return await ctx.send(
-                f"There is no VFL account with the ID `{user}`.", 
+                f"There is no VFL account with the ID `{id}`.", 
                 allowed_mentions=n.AllowedMentions.none(),
             )
         return await self.purchases_list_generic(ctx, conn, user_rows)
