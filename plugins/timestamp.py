@@ -1,3 +1,22 @@
+"""
+Copyright (c) Kae Bartlett
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+
+from __future__ import annotations
+
 from datetime import datetime as dt, timedelta, timezone
 import re
 
@@ -91,7 +110,7 @@ class Timestamp(client.Plugin):
                 name="year",
                 type=novus.ApplicationOptionType.INTEGER,
                 description="The year of the given datetime.",
-                min_value=2_000,
+                min_value=1_970,
                 max_value=3_000,
                 required=False,
             ),
