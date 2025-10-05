@@ -1,3 +1,6 @@
+CREATE EXTENSION IF NOT EXISTS citext;
+
+
 CREATE TABLE IF NOT EXISTS guild_settings(
     guild_id BIGINT PRIMARY KEY,
     report_channel_id BIGINT,
@@ -36,4 +39,12 @@ CREATE TABLE IF NOT EXISTS message_logs(
     author_name TEXT,
     message_content TEXT,
     PRIMARY KEY (log_id, message_id)
+);
+
+
+CREATE TABLE IF NOT EXISTS wheels(
+    user_id BIGINT NOT NULL,
+    name citext NOT NULL,
+    entries citext[] NOT NULL DEFAULT '{}',
+    PRIMARY KEY (user_id, name)
 );
