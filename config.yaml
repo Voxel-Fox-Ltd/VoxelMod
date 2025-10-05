@@ -33,6 +33,7 @@ plugins:
 - plugins.moderation.mute:Mute
 - plugins.moderation.report:Report
 - plugins.moderation.warn:Warn
+- plugins.wheel:Wheel
 - novus.ext.database:Database
 database_dsn: $DSN
 vfl_database_dsn: $VFL_DSN
