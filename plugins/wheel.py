@@ -63,7 +63,7 @@ class Wheel(client.Plugin):
             except asyncpg.UniqueViolationError:
                 await ctx.send("Another wheel with the same name exists.", ephemeral=True)
                 return
-            
+
         await ctx.send("Wheel successfully created.")
 
     @client.command(
@@ -96,7 +96,7 @@ class Wheel(client.Plugin):
                 name,
                 user_id
             )
-        
+
         if len(deleted_row) > 0:
             await ctx.send("Wheel successfully deleted.")
         else:
@@ -173,7 +173,7 @@ class Wheel(client.Plugin):
                 """
                 UPDATE
                     wheels
-                SET 
+                SET
                     entries = ARRAY_REMOVE(entries, $1)
                 WHERE
                     $1 = ANY(entries)
@@ -194,7 +194,7 @@ class Wheel(client.Plugin):
                     "within the wheel."
                 ),
             )
-        
+
         await ctx.send("Entry successfully removed from wheel.")
 
     @client.command(
@@ -216,7 +216,7 @@ class Wheel(client.Plugin):
         async with db.Database.acquire() as conn:
             rows = await conn.fetch(
                 """
-                SELECT 
+                SELECT
                     entries
                 FROM
                     wheels
@@ -238,18 +238,18 @@ class Wheel(client.Plugin):
 
         chosen_entry = random.choice(wheel_entries)
         await ctx.send(
-            f"**{chosen_entry}** is the winner.", 
+            f"**{chosen_entry}** is the winner.",
             allowed_mentions=n.AllowedMentions.none(),
         )
 
     @client.command(
             name="wheel list",
-    )    
+    )
     async def wheel_list(self, ctx: n.types.CommandI) -> None:
         """
         Lists all of your wheels.
         """
-        
+
         wheels = await self.get_user_wheels(ctx.user.id)
         await ctx.send(
             self.prettify_list_uwu(wheels),
@@ -287,7 +287,7 @@ class Wheel(client.Plugin):
             self.prettify_list_uwu(entries),
             allowed_mentions=n.AllowedMentions.none(),
         )
-    
+
     async def get_user_wheels(self, user_id: int) -> list[str]:
         async with db.Database.acquire() as conn:
             wheel_names: list[dict[str, str]] = await conn.fetch(
@@ -305,7 +305,7 @@ class Wheel(client.Plugin):
         for row in wheel_names:
             actual_wheel_names.append(row.get("name"))
         return actual_wheel_names
-        
+
     async def get_wheel_entries(self, user_id: int, name: str) -> list[str]:
         async with db.Database.acquire() as conn:
             wheel_entries: list[dict[str, list[str]]] = await conn.fetch(
@@ -321,7 +321,7 @@ class Wheel(client.Plugin):
                 user_id,
                 name,
             )
-        if wheel_entries:    
+        if wheel_entries:
             actual_wheel_entries = wheel_entries[0].get("entries")
             self.log.info(actual_wheel_entries)
             return actual_wheel_entries
@@ -333,18 +333,18 @@ class Wheel(client.Plugin):
     @wheel_list.autocomplete
     @wheel_entries.autocomplete
     async def wheel_name_autocomplete(
-            self, 
+            self,
             ctx: n.Interaction) -> list[n.ApplicationCommandChoice]:
         user_id = ctx.user.id
         wheels = await self.get_user_wheels(user_id)
         return [
             n.ApplicationCommandChoice(name) for name in wheels
         ]
-    
+
     @add_entry.autocomplete
     @remove_entry.autocomplete
     async def wheel_entries_autocomplete(
-            self, 
+            self,
             ctx: n.Interaction[n.ApplicationCommandData]) -> list[n.ApplicationCommandChoice]:
         self.log.info(ctx.data.options)
         focused = [i for i in ctx.data.options[0].options if i.focused][0]
