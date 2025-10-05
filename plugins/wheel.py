@@ -240,7 +240,20 @@ class Wheel(client.Plugin):
         await ctx.send(
             f"**{chosen_entry}** is the winner.",
             allowed_mentions=n.AllowedMentions.none(),
+            components=[
+                n.ActionRow([
+                    n.Button("Spin again", custom_id=f"WHEEL SPIN {name}")
+                ])
+            ],
         )
+
+    @client.event.filtered_component("WHEEL SPIN ")
+    async def on_wheel_button_press(self, ctx: n.types.ComponentI) -> None:
+        """
+        Handles wheel spin button presses.
+        """
+
+        await self.wheel_spin(ctx, ctx.data.custom_id[len("WHEEL SPIN "):])
 
     @client.command(
             name="wheel list",
