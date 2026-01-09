@@ -23,6 +23,7 @@ intents:
   guilds: true
   message_content: true
 plugins:
+- plugins.animals:Animals
 - plugins.payments:Payments
 - plugins.settings:Settings
 - plugins.timestamp:Timestamp
@@ -38,3 +39,6 @@ plugins:
 database_dsn: $DSN
 vfl_database_dsn: $VFL_DSN
 database_max_connections: 1
+api_keys:
+  _user_agent: "Voxel Fox Discord bot (kae@voxelfox.co.uk)"
+  cat_api_key: $CAT_API_KEY
