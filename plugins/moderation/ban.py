@@ -80,7 +80,8 @@ class Ban(client.Plugin):
         if duration:
             future = dt.utcnow() + get_datetime_until(duration)
         try:
-            await user.ban(
+            await interaction.guild.ban(
+                user,
                 delete_message_seconds=int(delete_days * (24 * 60 * 60)),
                 reason=reason,
             )
