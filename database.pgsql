@@ -48,3 +48,13 @@ CREATE TABLE IF NOT EXISTS wheels(
     entries citext[] NOT NULL DEFAULT '{}',
     PRIMARY KEY (user_id, name)
 );
+
+
+CREATE TABLE IF NOT EXISTS role_pickers(
+    guild_id BIGINT NOT NULL,
+    name citext NOT NULL,
+    role_ids BIGINT[] NOT NULL,
+    type TEXT NOT NULL,
+    PRIMARY KEY (guild_id, name)
+);
+

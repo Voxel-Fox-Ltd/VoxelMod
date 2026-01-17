@@ -24,9 +24,6 @@ intents:
   message_content: true
 plugins:
 - plugins.animals:Animals
-- plugins.payments:Payments
-- plugins.settings:Settings
-- plugins.timestamp:Timestamp
 - plugins.moderation.ban:Ban
 - plugins.moderation.clear:Clear
 - plugins.moderation.history:History
@@ -34,6 +31,10 @@ plugins:
 - plugins.moderation.mute:Mute
 - plugins.moderation.report:Report
 - plugins.moderation.warn:Warn
+- plugins.payments:Payments
+- plugins.rolepicker:RolePicker
+- plugins.settings:Settings
+- plugins.timestamp:Timestamp
 - plugins.wheel:Wheel
 - novus.ext.database:Database
 database_dsn: $DSN
