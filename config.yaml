@@ -1,5 +1,5 @@
-token: $TOKEN
-pubkey: ''
+token: '$TOKEN'
+pubkey: '7940294c0dbdee37e3b2edf042dc95ea8bf459fa37b37d2c2fa7e0cbf5bb90fd'
 shard_count: 1
 shard_ids: null
 intents:
@@ -31,15 +31,16 @@ plugins:
 - plugins.moderation.mute:Mute
 - plugins.moderation.report:Report
 - plugins.moderation.warn:Warn
-- plugins.payments:Payments
+# - plugins.payments:Payments
 - plugins.rolepicker:RolePicker
 - plugins.settings:Settings
 - plugins.timestamp:Timestamp
 - plugins.wheel:Wheel
+- plugins.reminders:Reminders
 - novus.ext.database:Database
 database_dsn: $DSN
 vfl_database_dsn: $VFL_DSN
 database_max_connections: 1
 api_keys:
-  _user_agent: "Voxel Fox Discord bot (kae@voxelfox.co.uk)"
+  _user_agent: "Voxel Fox Discord bot (daniel@voxelfox.co.uk)"
   cat_api_key: $CAT_API_KEY
