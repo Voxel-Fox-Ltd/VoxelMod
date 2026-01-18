@@ -53,6 +53,7 @@ class Reminders(client.Plugin):
             return
         channel_id = ctx.channel.id
         user_id = ctx.user.id
+        guild_id = ctx.guild.id
         async with db.Database.acquire() as conn:
             try:
                 await conn.execute(
@@ -63,20 +64,23 @@ class Reminders(client.Plugin):
                             reminder_name,
                             reminder_time,
                             user_id,
-                            message_channel_id
+                            message_channel_id,
+                            guild_id
                         )
                     VALUES
                         (
                             $1,
                             $2,
                             $3,
-                            $4
+                            $4,
+                            $5
                         )
                     """,
                     reminder,
                     reminder_time,
                     user_id,
-                    channel_id
+                    channel_id,
+                    guild_id
                 )
             except asyncpg.UniqueViolationError:
                 await ctx.send("Another reminder with the same name exists.", ephemeral=True)
@@ -118,13 +122,51 @@ class Reminders(client.Plugin):
                 user_id
             )
         if len(deleted_row) > 0:
-            await ctx.send("Reminder successfully deleted.")
+            await ctx.send(
+                "Reminder successfully deleted.",
+                ephemeral=True
+                )
         else:
             await ctx.send("There is no reminder with that name.")
 
+    @client.loop(15)
+    async def reminder_loop(self) -> None:
+        """
+        Loop through all reminders, unbanning them if the reminder time has elapsed.
+        """
+
+        # Get all reminders where the reminder time has been passed
+        async with db.Database.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                DELETE FROM
+                    reminders
+                WHERE
+                    reminder_time <= TIMEZONE('UTC', NOW())
+                RETURNING
+                    *
+                """
+            )
+        for row in rows:
+            channel_id = row["message_channel_id"]
+            user_id = row["user_id"]
+            reminder = row["reminder_name"]
+            guild_id = row["guild_id"]
+            channel = n.Channel.partial(self.bot.state, channel_id)
+            fake_guild = n.Object(guild_id, state=self.state)
+            try:
+                member = await n.Guild.fetch_member(fake_guild, id)
+            except error as e:
+                self.log.info(e)
+            if member:
+                try:
+                    await channel.send(f"Reminder for <@{user_id}>: '{reminder}'")
+                except n.NotFound as error:
+                    self.log.info(error)
+            else:
+                return
     
-
-
+    
     async def get_user_reminders(self, user_id: int) -> list[str]:
         async with db.Database.acquire() as conn:
             reminder_names: list[dict[str, str]] = await conn.fetch(

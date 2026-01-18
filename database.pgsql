@@ -59,8 +59,9 @@ CREATE TABLE IF NOT EXISTS role_pickers(
 );
 
 CREATE TABLE IF NOT EXISTS reminders(
-    user_id BIGINT NOT NULL
-    message_channel_id BIGINT NOT NULL
-    reminder_name TEXT NOT NULL
+    user_id BIGINT NOT NULL,
+    message_channel_id BIGINT NOT NULL,
+    guild_id BIGINT NOT NULL,
+    reminder_name TEXT NOT NULL,
     reminder_time TIMESTAMP
 );
