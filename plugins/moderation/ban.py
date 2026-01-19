@@ -77,7 +77,10 @@ class Ban(client.Plugin):
         # Get duration
         future: dt | None = None
         if duration:
-            future = dt.utcnow() + get_datetime_until(duration)
+            try:
+                future = n.utils.utcnow() + get_datetime_until(duration)
+            except OverflowError:
+                future = None
         try:
             await interaction.guild.ban(
                 user,
@@ -125,9 +128,12 @@ class Ban(client.Plugin):
                     """,
                     interaction.guild.id,
                     user.id,
-                    future,
+                    future.naive,
                 )
-        await interaction.send(f"**{user.mention}** has been banned.")
+        if future:
+            await interaction.send(f"**{user.mention}** has been banned until {future.mention}.")
+        else:
+            await interaction.send(f"**{user.mention}** has been banned.")
 
     @client.command(
         name="unban",
