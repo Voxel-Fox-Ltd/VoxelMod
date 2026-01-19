@@ -41,7 +41,7 @@ class Reminders(client.Plugin):
         ],
         dm_permission=False,
     )
-    async def create_reminder(self, ctx: n.types.CommandI, reminder: str, time: str) -> None:
+    async def create_reminder(self, ctx: n.types.CommandGI, reminder: str, time: str) -> None:
         """
         Creates a reminder with the given name and time.
         """
@@ -173,6 +173,7 @@ class Reminders(client.Plugin):
         Provides the autocomplete for a user's list of reminders.
         """
 
+        assert ctx.guild is not None
         async with db.Database.acquire() as conn:
             reminder_names: list[dict[str, str]] = await conn.fetch(
                 """
@@ -185,7 +186,7 @@ class Reminders(client.Plugin):
                     AND guild_id = $2
                 """,
                 ctx.user.id,
-                ctx.guild_id,
+                ctx.guild.id,
             )
         choices = []
         for row in reminder_names:
