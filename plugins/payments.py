@@ -18,6 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 import os
+import uuid
 
 import asyncpg
 import dotenv
@@ -89,6 +90,11 @@ class Payments(client.Plugin):
         """
         Get the purchases for a given VFL user ID.
         """
+
+        try:
+            uuid.UUID(id)
+        except Exception:
+            return await ctx.send("Bad format for ID.", ephemeral=True)
 
         conn = await self.get_connection()
         user_rows = await conn.fetch(
