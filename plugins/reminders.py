@@ -17,12 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-from datetime import datetime as dt, timedelta
-from utils import get_datetime_until
-
 import novus as n
 from novus.ext import client, database as db
-import asyncpg
+
+from utils import get_datetime_until
 
 
 class Reminders(client.Plugin):
@@ -41,55 +39,50 @@ class Reminders(client.Plugin):
                 type=n.ApplicationOptionType.STRING,
             ),
         ],
+        dm_permission=False,
     )
     async def create_reminder(self, ctx: n.types.CommandI, reminder: str, time: str) -> None:
         """
         Creates a reminder with the given name and time.
         """
+
         try:
-            reminder_time = dt.utcnow() + get_datetime_until(time)
+            reminder_time = n.utils.utcnow() + get_datetime_until(time)
         except OverflowError:
             await ctx.send("Please enter a smaller period of time.", ephemeral=True)
             return
-        channel_id = ctx.channel.id
-        user_id = ctx.user.id
-        guild_id = ctx.guild.id
         async with db.Database.acquire() as conn:
-            try:
-                await conn.execute(
-                    """
-                    INSERT INTO
-                        reminders
-                        (
-                            reminder_name,
-                            reminder_time,
-                            user_id,
-                            message_channel_id,
-                            guild_id
-                        )
-                    VALUES
-                        (
-                            $1,
-                            $2,
-                            $3,
-                            $4,
-                            $5
-                        )
-                    """,
-                    reminder,
-                    reminder_time,
-                    user_id,
-                    channel_id,
-                    guild_id
-                )
-            except asyncpg.UniqueViolationError:
-                await ctx.send("Another reminder with the same name exists.", ephemeral=True)
-                return
+            await conn.execute(
+                """
+                INSERT INTO
+                    reminders
+                    (
+                        reminder_name,
+                        reminder_time,
+                        user_id,
+                        message_channel_id,
+                        guild_id
+                    )
+                VALUES
+                    (
+                        $1,
+                        $2,
+                        $3,
+                        $4,
+                        $5
+                    )
+                """,
+                reminder,
+                reminder_time.naive,
+                ctx.user.id,
+                ctx.channel.id,
+                ctx.guild.id
+            )
 
         await ctx.send(
-            f"Reminder '{reminder}' successfully created for <t:{round(dt.timestamp(reminder_time))}>.",
+            f"Reminder '{reminder}' successfully created for {reminder_time.mention}.",
             allowed_mentions=n.AllowedMentions.none()
-            )
+        )
 
     @client.command(
         name="reminder delete",
@@ -101,11 +94,13 @@ class Reminders(client.Plugin):
                 autocomplete=True,
             ),
         ],
+        dm_permission=False,
     )
     async def delete_reminder(self, ctx: n.types.CommandI, reminder: str) -> None:
         """
         Deletes a reminder with given name.
         """
+
         user_id = ctx.user.id
         async with db.Database.acquire() as conn:
             deleted_row = await conn.fetch(
@@ -147,27 +142,37 @@ class Reminders(client.Plugin):
                     *
                 """
             )
+
+        # Send expired reminders out to the user
         for row in rows:
-            channel_id = row["message_channel_id"]
-            user_id = row["user_id"]
+
+            # Make a fake guild so that we can get the user and channel
             reminder = row["reminder_name"]
-            guild_id = row["guild_id"]
-            channel = n.Channel.partial(self.bot.state, channel_id)
-            fake_guild = n.Object(guild_id, state=self.state)
+            channel = n.Channel.partial(self.state, row["message_channel_id"])
+            fake_guild = n.Object(row["guild_id"], state=self.state)
+
+            # Make sure the user is in the server
             try:
-                member = await n.Guild.fetch_member(fake_guild, id)
-            except error as e:
-                self.log.info(e)
-            if member:
-                try:
-                    await channel.send(f"Reminder for <@{user_id}>: '{reminder}'")
-                except n.NotFound as error:
-                    self.log.info(error)
-            else:
-                return
-    
-    
-    async def get_user_reminders(self, user_id: int) -> list[str]:
+                member = await n.Guild.fetch_member(fake_guild, row["user_id"])
+            except n.NotFound:
+                continue
+            
+            # Try and send the reminder
+            try:
+                await channel.send(f"Reminder for <@{member.id}>: '{reminder}'")
+            except n.Forbidden:
+                self.log.info("Could not send reminder in channel %s", channel.id)
+            except Exception as e:
+                self.log.info("Could not send reminder in channel %s (%s)", channel.id, e)
+
+    @delete_reminder.autocomplete
+    async def reminder_name_autocomplete(
+            self,
+            ctx: n.Interaction) -> list[n.ApplicationCommandChoice]:
+        """
+        Provides the autocomplete for a user's list of reminders.
+        """
+
         async with db.Database.acquire() as conn:
             reminder_names: list[dict[str, str]] = await conn.fetch(
                 """
@@ -177,20 +182,13 @@ class Reminders(client.Plugin):
                     reminders
                 WHERE
                     user_id = $1
+                    AND guild_id = $2
                 """,
-                user_id,
+                ctx.user.id,
+                ctx.guild_id,
             )
-        actual_reminder_names: list[str] = []
+        choices = []
         for row in reminder_names:
-            actual_reminder_names.append(row.get("reminder_name"))
-        return actual_reminder_names
-
-    @delete_reminder.autocomplete
-    async def reminder_name_autocomplete(
-            self,
-            ctx: n.Interaction) -> list[n.ApplicationCommandChoice]:
-        user_id = ctx.user.id
-        reminders = await self.get_user_reminders(user_id)
-        return [
-            n.ApplicationCommandChoice(name) for name in reminders
-        ]
+            choice = n.ApplicationCommandChoice(row["reminder_name"])
+            choices.append(choice)
+        return choices
