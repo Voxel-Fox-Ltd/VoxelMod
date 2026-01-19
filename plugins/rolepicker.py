@@ -100,6 +100,7 @@ class RolePicker(client.Plugin):
                 type=n.ApplicationOptionType.STRING,
             ),
         ],
+        default_member_permissions=n.Permissions(manage_roles=True),
         dm_permission=False,
     )
     async def create_role_picker(self, ctx: t.CommandI, name: str):
@@ -239,6 +240,7 @@ class RolePicker(client.Plugin):
                 autocomplete=True,
             ),
         ],
+        default_member_permissions=n.Permissions(manage_roles=True),
         dm_permission=False,
     )
     async def delete_role_picker(self, ctx: t.CommandGI, name: str):
@@ -283,6 +285,7 @@ class RolePicker(client.Plugin):
                 autocomplete=True,
             ),
         ],
+        default_member_permissions=n.Permissions(manage_roles=True),
         dm_permission=False,
     )
     async def edit_role_picker(self, ctx: t.CommandGI, name: str):
@@ -336,6 +339,7 @@ class RolePicker(client.Plugin):
                 required=False,
             ),
         ],
+        default_member_permissions=n.Permissions(manage_roles=True),
         dm_permission=False,
     )
     async def post_role_picker(self, ctx: t.CommandGI, name: str, content: str | None = None):
