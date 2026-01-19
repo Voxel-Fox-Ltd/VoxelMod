@@ -18,10 +18,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
 from datetime import datetime as dt
-import itertools
 from typing import cast
 
-import novus
+import novus as n
 from novus.ext import client, database as db
 
 from utils import Action, ActionType, create_chat_log,  get_datetime_until
@@ -32,37 +31,37 @@ class Ban(client.Plugin):
     @client.command(
         name="ban",
         options=[
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="user",
-                type=novus.ApplicationOptionType.USER,
+                type=n.ApplicationOptionType.USER,
                 description="The user who you want to ban.",
             ),
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="reason",
-                type=novus.ApplicationOptionType.STRING,
+                type=n.ApplicationOptionType.STRING,
                 description="The reason for banning this user.",
                 required=False,
             ),
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="delete_days",
-                type=novus.ApplicationOptionType.NUMBER,
+                type=n.ApplicationOptionType.NUMBER,
                 description="The number of days of messages that you want to delete.",
                 required=False,
             ),
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="duration",
-                type=novus.ApplicationOptionType.STRING,
+                type=n.ApplicationOptionType.STRING,
                 description="The amount of time to ban the user for.",
                 required=False,
             ),
         ],
-        default_member_permissions=novus.Permissions(ban_members=True),
+        default_member_permissions=n.Permissions(ban_members=True),
         dm_permission=False,
     )
     async def ban(
             self,
-            interaction: novus.types.CommandI,
-            user: novus.GuildMember,
+            interaction: n.types.CommandGI,
+            user: n.GuildMember,
             *,
             reason: str | None = None,
             delete_days: float = 1.0,
@@ -85,7 +84,7 @@ class Ban(client.Plugin):
                 delete_message_seconds=int(delete_days * (24 * 60 * 60)),
                 reason=reason,
             )
-        except novus.Unauthorized:
+        except n.Unauthorized:
             await interaction.send(
                 "I'm missing the relevant permissions to ban that user.",
             )
@@ -133,18 +132,18 @@ class Ban(client.Plugin):
     @client.command(
         name="unban",
         options=[
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="user_id",
-                type=novus.ApplicationOptionType.STRING,
+                type=n.ApplicationOptionType.STRING,
                 description="The ID of the user that you want to unban.",
             ),
         ],
-        default_member_permissions=novus.Permissions(ban_members=True),
+        default_member_permissions=n.Permissions(ban_members=True),
         dm_permission=False,
     )
     async def unban(
             self,
-            interaction: novus.types.CommandI,
+            interaction: n.types.CommandI,
             user_id: str) -> None:
         """
         Unban a member from a guild.
@@ -166,7 +165,7 @@ class Ban(client.Plugin):
                 moderator_id=interaction.user.id,
             )
 
-        fake_guild = novus.Object(interaction.guild.id, state=self.bot.state)
+        fake_guild = n.Object(interaction.guild.id, state=self.bot.state)
         success = await self.try_unban(fake_guild, user_id_int)
         if not success:
             return await interaction.send("I was unable to unban that user.")
@@ -205,14 +204,14 @@ class Ban(client.Plugin):
         for row in rows:
             row = cast(dict[str, int], row)
             guild_id = row["guild_id"]
-            fake_guild = novus.Object(guild_id, state=self.bot.state)
+            fake_guild = n.Object(guild_id, state=self.bot.state)
             user_id = row["user_id"]
             if not await self.try_unban(fake_guild, user_id):
                 break
 
     async def try_unban(
             self,
-            guild: novus.abc.StateSnowflake,
+            guild: n.abc.StateSnowflake,
             user_id: int) -> bool:
         """
         Try and unban a given user from the guild
@@ -221,7 +220,7 @@ class Ban(client.Plugin):
 
         Parameters
         ----------
-        guild : novus.abc.StateSnowflake
+        guild : n.abc.StateSnowflake
             The guild object that you want to unban the user from.
         user_id : int
             The ID of the user to be unbanned.
@@ -233,18 +232,18 @@ class Ban(client.Plugin):
         """
 
         try:
-            await novus.Guild.unban(
+            await n.Guild.unban(
                 guild,
                 user_id,
                 reason="Temporary ban has expired.",
             )
-        except novus.Forbidden:
+        except n.Forbidden:
             self.log.info(
                 "Missing permissions to unban users in guild %s",
                 guild.id,
             )
             return False  # Don't try and unban in guilds where we can't unban
-        except novus.NotFound:
+        except n.NotFound:
             self.log.info(
                 "User %s in guild %s is already unbanned",
                 user_id, guild.id,
