@@ -26,7 +26,7 @@ __all__ = (
 )
 
 
-def get_datetime_until(time: str) -> timedelta:
+def get_datetime_until(time: str, default_days: int | None = 28) -> timedelta:
     """
     Parse a duration string. If no duration qualifier is given, the default is days.
 
@@ -39,6 +39,11 @@ def get_datetime_until(time: str) -> timedelta:
     -------
     datetime.timedelta
         A delta of the time.
+
+    Raises
+    ------
+    ValueError
+        If the given time wasn't a valid string.
     """
 
     # If a duration qualifier is not provided, assume days
@@ -50,7 +55,10 @@ def get_datetime_until(time: str) -> timedelta:
 
     # If no match is found, the default time is 28 days
     if not re.match(f"^{pattern}+$", time):
-        return timedelta(days=28)
+        if default_days is not None:
+            return timedelta(days=default_days)
+        else:
+            raise ValueError("Invalid time was given (%s)" % time)
 
     # Get the matches from the string
     matches = re.finditer(pattern, time.replace(' ', '').lower())

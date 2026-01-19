@@ -1,4 +1,4 @@
-token: $TOKEN
+token: '$TOKEN'
 pubkey: ''
 shard_count: 1
 shard_ids: null
@@ -36,6 +36,7 @@ plugins:
 - plugins.settings:Settings
 - plugins.timestamp:Timestamp
 - plugins.wheel:Wheel
+- plugins.reminders:Reminders
 - novus.ext.database:Database
 database_dsn: $DSN
 vfl_database_dsn: $VFL_DSN

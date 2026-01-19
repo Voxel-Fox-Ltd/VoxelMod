@@ -58,3 +58,10 @@ CREATE TABLE IF NOT EXISTS role_pickers(
     PRIMARY KEY (guild_id, name)
 );
 
+CREATE TABLE IF NOT EXISTS reminders(
+    guild_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    message_channel_id BIGINT NOT NULL,
+    reminder_name citext NOT NULL,
+    reminder_time TIMESTAMP
+);
