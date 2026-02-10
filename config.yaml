@@ -1,4 +1,4 @@
-token: '$TOKEN'
+token: $TOKEN
 pubkey: ''
 shard_count: 1
 shard_ids: null
@@ -38,9 +38,16 @@ plugins:
 - plugins.wheel:Wheel
 - plugins.reminders:Reminders
 - novus.ext.database:Database
+- novus.ext.twitch:Twitch
 database_dsn: $DSN
 vfl_database_dsn: $VFL_DSN
 database_max_connections: 1
 api_keys:
   _user_agent: "Voxel Fox Discord bot (kae@voxelfox.co.uk)"
   cat_api_key: $CAT_API_KEY
+twitch_client_id: a5jykhciz9oojzavs6udkmiclhuz06
+twitch_client_secret: $TWITCH_CLIENT_SECRET
+twitch_users:
+  - voxelfoxkae
+  - cosmixdust
+  - tecnorogue
