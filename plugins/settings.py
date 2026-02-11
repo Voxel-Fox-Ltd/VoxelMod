@@ -19,7 +19,8 @@ from __future__ import annotations
 
 from typing import Any
 
-import novus
+import novus as n
+from novus import types as t
 from novus.ext import client, database as db
 
 
@@ -66,19 +67,19 @@ class Settings(client.Plugin):
     @client.command(
         name="settings channel report",
         options=[
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="channel",
-                type=novus.ApplicationOptionType.CHANNEL,
+                type=n.ApplicationOptionType.CHANNEL,
                 description="The channel where you want reports to funnel to.",
-                channel_types=[novus.ChannelType.GUILD_TEXT],
+                channel_types=[n.ChannelType.GUILD_TEXT],
             ),
         ],
-        default_member_permissions=novus.Permissions(manage_guild=True),
+        default_member_permissions=n.Permissions(manage_guild=True),
     )
     async def report_channel_settings(
             self,
-            interaction: novus.types.CommandI,
-            channel: novus.Channel) -> None:
+            interaction: t.CommandI,
+            channel: n.Channel) -> None:
         """
         Set the report channel.
         """
@@ -98,19 +99,19 @@ class Settings(client.Plugin):
     @client.command(
         name="settings channel message_logs",
         options=[
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="channel",
-                type=novus.ApplicationOptionType.CHANNEL,
+                type=n.ApplicationOptionType.CHANNEL,
                 description="The channel where you want message logs to funnel to.",
-                channel_types=[novus.ChannelType.GUILD_TEXT],
+                channel_types=[n.ChannelType.GUILD_TEXT],
             ),
         ],
-        default_member_permissions=novus.Permissions(manage_guild=True),
+        default_member_permissions=n.Permissions(manage_guild=True),
     )
     async def message_logs_channel_settings(
             self,
-            interaction: novus.types.CommandI,
-            channel: novus.Channel) -> None:
+            interaction: t.CommandI,
+            channel: n.Channel) -> None:
         """
         Set the message logs channel.
         """
@@ -130,18 +131,18 @@ class Settings(client.Plugin):
     @client.command(
         name="settings role staff",
         options=[
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="role",
-                type=novus.ApplicationOptionType.ROLE,
+                type=n.ApplicationOptionType.ROLE,
                 description="The role that all of staff members have.",
             ),
         ],
-        default_member_permissions=novus.Permissions(manage_guild=True),
+        default_member_permissions=n.Permissions(manage_guild=True),
     )
     async def staff_role_settings(
             self,
-            interaction: novus.types.CommandI,
-            role: novus.Role) -> None:
+            interaction: t.CommandI,
+            role: n.Role) -> None:
         """
         Set the staff role.
         """
@@ -155,34 +156,62 @@ class Settings(client.Plugin):
         )
         await interaction.send(
             f"The report channel has been set to **{role.mention}**.",
-            allowed_mentions=novus.AllowedMentions.none(),
+            allowed_mentions=n.AllowedMentions.none(),
             ephemeral=True,
         )
 
     @client.command(
-        name="settings role tag",
+        name="settings custom-role allowed",
         options=[
-            novus.ApplicationCommandOption(
+            n.ApplicationCommandOption(
                 name="role",
-                type=novus.ApplicationOptionType.ROLE,
-                description="The role for the tag game.",
+                type=n.ApplicationOptionType.ROLE,
+                description="Users with this role can create custom roles.",
             ),
         ],
-        default_member_permissions=novus.Permissions(manage_guild=True),
+        default_member_permissions=n.Permissions(manage_guild=True),
     )
-    async def tag_role_settings(
+    async def allowed_custom_role_settings(
             self,
-            ctx: novus.types.CommandI,
-            role: novus.Role) -> None:
+            ctx: t.CommandI,
+            role: n.Role) -> None:
         """
-        Set the tag role.
+        Set the custom role allowed role.
         """
 
         await ctx.defer(ephemeral=True)
         assert ctx.guild
-        await self.set_guild_item("staff_role_id", ctx.guild.id, role.id)
+        await self.set_guild_item("custom_role_allowed_role_id", ctx.guild.id, role.id)
         await ctx.send(
-            f"The tag role has been set to **{role.mention}**.",
-            allowed_mentions=novus.AllowedMentions.none(),
+            f"The custom role allowed role has been set to **{role.mention}**.",
+            allowed_mentions=n.AllowedMentions.none(),
+            ephemeral=True,
+        )
+
+    @client.command(
+        name="settings custom-role beneath",
+        options=[
+            n.ApplicationCommandOption(
+                name="role",
+                type=n.ApplicationOptionType.ROLE,
+                description="Created custom roles will be moved beneath this role.",
+            ),
+        ],
+        default_member_permissions=n.Permissions(manage_guild=True),
+    )
+    async def beneath_custom_role_settings(
+            self,
+            ctx: t.CommandI,
+            role: n.Role) -> None:
+        """
+        Set the custom role beneath role.
+        """
+
+        await ctx.defer(ephemeral=True)
+        assert ctx.guild
+        await self.set_guild_item("custom_role_beneath_role_id", ctx.guild.id, role.id)
+        await ctx.send(
+            f"The custom role beneath role has been set to **{role.mention}**.",
+            allowed_mentions=n.AllowedMentions.none(),
             ephemeral=True,
         )

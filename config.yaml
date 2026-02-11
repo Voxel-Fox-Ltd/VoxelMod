@@ -24,6 +24,7 @@ intents:
   message_content: true
 plugins:
 - plugins.animals:Animals
+- plugins.custom_role:CustomRole
 - plugins.moderation.ban:Ban
 - plugins.moderation.clear:Clear
 - plugins.moderation.history:History

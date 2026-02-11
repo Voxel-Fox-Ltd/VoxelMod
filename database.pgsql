@@ -5,7 +5,9 @@ CREATE TABLE IF NOT EXISTS guild_settings(
     guild_id BIGINT PRIMARY KEY,
     report_channel_id BIGINT,
     staff_role_id BIGINT,
-    message_channel_id BIGINT
+    message_channel_id BIGINT,
+    custom_role_allowed_role_id BIGINT,
+    custom_role_beneath_role_id BIGINT
 );
 
 
@@ -64,4 +66,12 @@ CREATE TABLE IF NOT EXISTS reminders(
     message_channel_id BIGINT NOT NULL,
     reminder_name citext NOT NULL,
     reminder_time TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS custom_roles(
+    guild_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    PRIMARY KEY (guild_id, user_id)
 );
