@@ -24,6 +24,46 @@ from novus.ext import client, database as db
 
 class CustomRole(client.Plugin):
 
+    async def readd_custom_role(self, guild: n.BaseGuild, user: n.GuildMember, role_id: int) -> int:
+        """
+        Re-adds a custom role to a user if they lost it but are still allowed to have it.
+
+        Parameters
+        ----------
+        guild : n.Guild
+            The guild that the user and role are in.
+        user_id : int
+            The ID of the user to re-add the role to.
+        role_id : int
+            The ID of the role to re-add.
+
+        Returns
+        -------
+        bool
+            Whether the role was successfully re-added.
+        """
+
+        if role_id is None:
+            raise ValueError("Role ID cannot be None.")
+        if role_id in user.role_ids:
+            # User already has the role
+            return -1
+        try:
+            await guild.add_member_role(
+                user.id,
+                role_id,
+                reason="User custom role.",
+            )
+        except n.NotFound:
+            # Role doesn't exist
+            return 1
+        except n.Forbidden:
+            # We can't manage roles
+            return 2
+        else:
+            # Successfully re-added
+            return 0
+
     @client.command(
         "custom-role create",
         dm_permission=False,
@@ -79,22 +119,14 @@ class CustomRole(client.Plugin):
 
         # See if they already have a custom role and readd if they lost it
         if existing_custom_role_id is not None:
-            if existing_custom_role_id in ctx.user.role_ids:
+            status = await self.readd_custom_role(ctx.guild, ctx.user, existing_custom_role_id)
+            if status == -1:
                 await ctx.send(
                     "You already have a custom role!",
                     ephemeral=True,
                 )
                 return
-            try:
-                await ctx.guild.add_member_role(
-                    ctx.user.id,
-                    existing_custom_role_id,
-                    reason="User custom role.",
-                )
-            except n.NotFound:
-                # They don't have the role but they ARE allowed one; upsert new role
-                pass
-            else:
+            elif status == 0:
                 await ctx.send(
                     "I've re-added your existing custom role to you!",
                     ephemeral=True,
@@ -167,14 +199,57 @@ class CustomRole(client.Plugin):
         Deletes a user's custom role from the server.
         """
 
-        # See if they have a custom role to delete
-        pass
+        async with db.Database.acquire() as conn:
 
-        # Delete the role and remove from database
-        pass
+            # See if they have a custom role to delete
+            custom_role_id: int | None = await conn.fetchval(
+                """
+                SELECT
+                    role_id
+                FROM
+                    custom_roles
+                WHERE
+                    guild_id = $1
+                    AND user_id = $2
+                """,
+                ctx.guild.id,
+                ctx.user.id,
+            )
+            if custom_role_id is None:
+                await ctx.send(
+                    "You don't have a custom role!",
+                    ephemeral=True,
+                )
+                return
+
+            # Delete the role and remove from database
+            try:
+                await ctx.guild.delete_role(
+                    custom_role_id,
+                    reason="User custom role deletion.",
+                )
+            except n.NotFound:
+                pass
+            except n.Forbidden:
+                await ctx.send(
+                    "I don't have permission to delete your custom role.",
+                    ephemeral=True,
+                )
+                return
+            await conn.execute(
+                """
+                DELETE FROM
+                    custom_roles
+                WHERE
+                    guild_id = $1
+                    AND user_id = $2
+                """,
+                ctx.guild.id,
+                ctx.user.id,
+            )
 
         # And done
-        await ctx.send("Deleted your custom role!")
+        await ctx.send("Deleted your custom role.")
 
     @client.command(
         "custom-role edit name",
@@ -192,11 +267,66 @@ class CustomRole(client.Plugin):
         Edits the name of a user's custom role.
         """
 
-        # See if they have a custom role to edit
-        pass
+        await ctx.defer(ephemeral=True)
+        async with db.Database.acquire() as conn:
+
+            # See if they have a custom role
+            custom_role_id: int | None = await conn.fetchval(
+                """
+                SELECT
+                    role_id
+                FROM
+                    custom_roles
+                WHERE
+                    guild_id = $1
+                    AND user_id = $2
+                """,
+                ctx.guild.id,
+                ctx.user.id,
+            )
+            if custom_role_id is None:
+                await ctx.send(
+                    "You don't have a custom role!",
+                    ephemeral=True,
+                )
+                return
+
+        # Readd role if necessary
+        assert isinstance(ctx.user, n.GuildMember), "User should be a GuildMember"
+        if custom_role_id is not None:
+            status = await self.readd_custom_role(ctx.guild, ctx.user, custom_role_id)
+            if status == 1:
+                await ctx.send(
+                    "Your custom role seems to have been deleted.",
+                    ephemeral=True,
+                )
+                return
+            elif status == 2:
+                await ctx.send(
+                    "I don't have permission to manage your custom role.",
+                    ephemeral=True,
+                )
+                return
 
         # Edit the role's name
-        pass
+        try:
+            await ctx.guild.edit_role(
+                custom_role_id,
+                name=name,
+                reason="User custom role name change.",
+            )
+        except n.NotFound:
+            await ctx.send(
+                "Your custom role seems to have been deleted.",
+                ephemeral=True,
+            )
+            return
+        except n.Forbidden:
+            await ctx.send(
+                "I don't have permission to manage your custom role.",
+                ephemeral=True,
+            )
+            return
 
         # And done
         await ctx.send(
@@ -220,18 +350,83 @@ class CustomRole(client.Plugin):
         Edits the colour of a user's custom role.
         """
 
-        # See if they have a custom role to edit
-        pass
+        await ctx.defer(ephemeral=True)
+
+        async with db.Database.acquire() as conn:
+
+            # See if they have a custom role
+            custom_role_id: int | None = await conn.fetchval(
+                """
+                SELECT
+                    role_id
+                FROM
+                    custom_roles
+                WHERE
+                    guild_id = $1
+                    AND user_id = $2
+                """,
+                ctx.guild.id,
+                ctx.user.id,
+            )
+            if custom_role_id is None:
+                await ctx.send(
+                    "You don't have a custom role!",
+                    ephemeral=True,
+                )
+                return
 
         # Validate colour
-        pass
+        if colour.startswith("#"):
+            colour = colour[1:]
+        try:
+            colour_int = int(colour, 16)
+        except ValueError:
+            await ctx.send(
+                "Invalid colour! Please provide a hex code like `#FF0000`.",
+                ephemeral=True,
+            )
+            return
+
+        # Readd role if necessary
+        assert isinstance(ctx.user, n.GuildMember), "User should be a GuildMember"
+        if custom_role_id is not None:
+            status = await self.readd_custom_role(ctx.guild, ctx.user, custom_role_id)
+            if status == 1:
+                await ctx.send(
+                    "Your custom role seems to have been deleted.",
+                    ephemeral=True,
+                )
+                return
+            elif status == 2:
+                await ctx.send(
+                    "I don't have permission to manage your custom role.",
+                    ephemeral=True,
+                )
+                return
 
         # Edit the role's colour
-        pass
+        try:
+            await ctx.guild.edit_role(
+                custom_role_id,
+                color=colour_int,
+                reason="User custom role colour change.",
+            )
+        except n.NotFound:
+            await ctx.send(
+                "Your custom role seems to have been deleted.",
+                ephemeral=True,
+            )
+            return
+        except n.Forbidden:
+            await ctx.send(
+                "I don't have permission to manage your custom role.",
+                ephemeral=True,
+            )
+            return
 
         # And done
         await ctx.send(
-            f"Changed your custom role's colour to **#{colour:0>6X}**!",
+            f"Changed your custom role's color to **#{colour_int:0>6X}**!",
             ephemeral=True,
         )
 
