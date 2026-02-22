@@ -64,11 +64,11 @@ class MeowChat(client.Plugin):
         if message.guild is None:
             return  # ignore DMs
 
-        assert isinstance(message.author, n.GuildMember)
-        assert message.author.permissions is not None
+        # assert isinstance(message.author, n.GuildMember)
+        # assert message.author.permissions is not None
 
-        if message.author.permissions.manage_messages:
-            return  # ignore mods
+        # if message.author.permissions.manage_messages:
+        #     return  # ignore mods
 
         if message.channel.id not in self.MEOW_CHATS:
             return  # ignore channels that don't have meow chat enabled
