@@ -80,7 +80,13 @@ class Reminders(client.Plugin):
             )
 
         await ctx.send(
-            f"Reminder '{reminder}' successfully created for {reminder_time.mention}.",
+            embeds=[
+                (
+                    n.Embed(title="Reminder Created", color=0x35A041)
+                    .add_field("Reminder", reminder)
+                    .add_field("Time", reminder_time.format("F"))
+                )
+            ],
             allowed_mentions=n.AllowedMentions.none()
         )
 
@@ -120,7 +126,7 @@ class Reminders(client.Plugin):
             await ctx.send(
                 "Reminder successfully deleted.",
                 ephemeral=True
-                )
+            )
         else:
             await ctx.send("There is no reminder with that name.")
 
@@ -156,10 +162,18 @@ class Reminders(client.Plugin):
                 member = await n.Guild.fetch_member(fake_guild, row["user_id"])
             except n.NotFound:
                 continue
-            
+
             # Try and send the reminder
             try:
-                await channel.send(f"Reminder for <@{member.id}>: '{reminder}'")
+                await channel.send(
+                    f"<@{member.id}>",
+                    embeds=[
+                        (
+                            n.Embed(title="Reminder", color=0x7DD7D5)
+                            .add_field("Reminder", reminder)
+                        )
+                    ]
+                )
             except n.Forbidden:
                 self.log.info("Could not send reminder in channel %s", channel.id)
             except Exception as e:
