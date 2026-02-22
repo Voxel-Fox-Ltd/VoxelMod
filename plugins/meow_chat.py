@@ -43,6 +43,7 @@ class MeowChat(client.Plugin):
         "owo",
         "rawr",
         "yip",
+        "mlem",
         re.compile(r"\bmrr+p\b", re.IGNORECASE),
     }
     MEOW_TIMEOUT_TASKS: dict[int, asyncio.Task] = {}
