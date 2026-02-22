@@ -85,10 +85,15 @@ class MeowChat(client.Plugin):
                     should_give_pointer = True
                     self.LAST_MEOW_POINTER[message.channel.id] = now
                 if should_give_pointer:
-                    await message.channel.send(
+                    m = await message.channel.send(
                         f"Hey {message.author.mention} meow chat is turned on for this channel! "
                         f"Meowing is mandatory :3"
                     )
+                    await asyncio.sleep(5)
+                    try:
+                        await m.delete()
+                    except Exception:
+                        pass
             except (n.Forbidden, n.NotFound):
                 pass
             except Exception as e:
