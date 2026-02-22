@@ -25,6 +25,7 @@ intents:
 plugins:
 - plugins.animals:Animals
 - plugins.custom_role:CustomRole
+- plugins.meow_chat:MeowChat
 - plugins.moderation.ban:Ban
 - plugins.moderation.clear:Clear
 - plugins.moderation.history:History
@@ -33,11 +34,11 @@ plugins:
 - plugins.moderation.report:Report
 - plugins.moderation.warn:Warn
 - plugins.payments:Payments
+- plugins.reminders:Reminders
 - plugins.rolepicker:RolePicker
 - plugins.settings:Settings
 - plugins.timestamp:Timestamp
 - plugins.wheel:Wheel
-- plugins.reminders:Reminders
 - novus.ext.database:Database
 - novus.ext.twitch:Twitch
 database_dsn: $DSN
