@@ -22,7 +22,7 @@ import re
 
 from novus.ext import client
 import novus as n
-from novus import types as t
+from novus import types as t, utils as nu
 
 import utils as u
 
@@ -38,6 +38,7 @@ class MeowChat(client.Plugin):
         "x3",
         ":3",
         "=3",
+        ";3",
         "uwu",
         "owo",
         "rawr",
@@ -45,6 +46,7 @@ class MeowChat(client.Plugin):
         re.compile(r"\bmrr+p\b", re.IGNORECASE),
     }
     MEOW_TIMEOUT_TASKS: dict[int, asyncio.Task] = {}
+    LAST_MEOW_POINTER: dict[int, nu.DiscordDatetime] = {}
 
     @staticmethod
     def match(pattern: str | re.Pattern, string: str) -> bool:
@@ -76,6 +78,17 @@ class MeowChat(client.Plugin):
         if not any(self.match(pattern, message.content) for pattern in self.MEOW_KEYWORDS):
             try:
                 await message.delete(reason="Meow chat enabled; invalid message.")
+                should_give_pointer = False
+                now = n.utils.utcnow()
+                last_pointer_time = self.LAST_MEOW_POINTER.get(message.channel.id)
+                if last_pointer_time is None or (now - last_pointer_time).total_seconds() > 60:
+                    should_give_pointer = True
+                    self.LAST_MEOW_POINTER[message.channel.id] = now
+                if should_give_pointer:
+                    await message.channel.send(
+                        f"Hey {message.author.mention} meow chat is turned on for this channel! "
+                        f"Meowing is mandatory :3"
+                    )
             except (n.Forbidden, n.NotFound):
                 pass
             except Exception as e:
