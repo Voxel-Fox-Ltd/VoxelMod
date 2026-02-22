@@ -20,6 +20,7 @@ from __future__ import annotations
 import random
 
 import novus as n
+from novus import types as t
 from novus.ext import client, database as db
 import asyncpg
 
@@ -36,7 +37,7 @@ class Wheel(client.Plugin):
             ),
         ],
     )
-    async def create_wheel(self, ctx: n.types.CommandI, name: str) -> None:
+    async def create_wheel(self, ctx: t.CommandI, name: str) -> None:
         """
         Creates a wheel with the given name.
         """
@@ -77,7 +78,7 @@ class Wheel(client.Plugin):
             ),
         ],
     )
-    async def delete_wheel(self, ctx: n.types.CommandI, name: str) -> None:
+    async def delete_wheel(self, ctx: t.CommandI, name: str) -> None:
         """
         Deletes a wheel with given name.
         """
@@ -103,7 +104,7 @@ class Wheel(client.Plugin):
             await ctx.send("There is no wheel with that name.")
 
     @client.command(
-        name="entry add",
+        name="wheel entries",
         options=[
             n.ApplicationCommandOption(
                 name="name",
@@ -111,91 +112,57 @@ class Wheel(client.Plugin):
                 type=n.ApplicationOptionType.STRING,
                 autocomplete=True
             ),
-            n.ApplicationCommandOption(
-                name="entry",
-                description="The name of the entry to be added to the wheel.",
-                type=n.ApplicationOptionType.STRING,
-            ),
         ],
     )
-    async def add_entry(self, ctx: n.types.CommandI, name: str, entry: str) -> None:
+    async def wheel_entries(self, ctx: t.CommandI, name: str) -> None:
         """
-        Adds an entry to a given wheel.
+        Let you show and edit your wheel entriess.
         """
+
+        entries = await self.get_wheel_entries(ctx.user.id, name)
+        await ctx.send_modal(
+            title=f"Entries for {name}",
+            custom_id=f"WHEEL ENTRIES {name}",
+            components=[
+                n.ActionRow([
+                    n.TextInput(
+                        label="Set wheel entries",
+                        custom_id="entry",
+                        style=n.TextInputStyle.PARAGRAPH,
+                        placeholder="Your wheel entries.",
+                        value="\n".join(entries) + "\n"
+                    )
+                ]),
+            ],
+        )
+
+    @client.event.filtered_component("WHEEL ENTRIES ")
+    async def update_wheel_entries(self, ctx: n.Interaction[n.ModalSubmitData]) -> None:
+        """
+        Update the wheel entries based on the modal submission.
+        """
+
         user_id = ctx.user.id
+        wheel_name = ctx.data.custom_id.split(" ", 2)[2]
+        value = ctx.data.components[0].components[0].value
         async with db.Database.acquire() as conn:
             updated_row = await conn.fetch(
                 """
                 UPDATE
                     wheels
                 SET
-                    entries = ARRAY_APPEND(entries, $1)
+                    entries = $1
                 WHERE
                     name = $2
                     AND user_id = $3
                 RETURNING
                     *
                 """,
-                entry,
-                name,
+                value.strip().split("\n"),
+                wheel_name,
                 user_id,
             )
-
-        if len(updated_row) > 0:
-            await ctx.send("Entry successfully added to wheel.")
-        else:
-            await ctx.send("You have no wheel with that name.")
-
-    @client.command(
-        name="entry delete",
-        options=[
-            n.ApplicationCommandOption(
-                name="name",
-                description="The name of the wheel to remove the entry from.",
-                type=n.ApplicationOptionType.STRING,
-                autocomplete=True
-            ),
-            n.ApplicationCommandOption(
-                name="entry",
-                description="The name of the entry to be removed from the wheel.",
-                type=n.ApplicationOptionType.STRING,
-                autocomplete=True
-            ),
-        ]
-    )
-    async def remove_entry(self, ctx: n.types.CommandI, name: str, entry: str) -> None:
-        """
-        Removes an entry from a given wheel.
-        """
-        user_id = ctx.user.id
-        async with db.Database.acquire() as conn:
-            updated_row = await conn.fetch(
-                """
-                UPDATE
-                    wheels
-                SET
-                    entries = ARRAY_REMOVE(entries, $1)
-                WHERE
-                    $1 = ANY(entries)
-                    AND name = $2
-                    AND user_id = $3
-                RETURNING
-                    *
-                """,
-                entry,
-                name,
-                user_id,
-            )
-
-        if not updated_row:
-            return await ctx.send(
-                (
-                    "You have no wheel with that name, or there is no entry with that name "
-                    "within the wheel."
-                ),
-            )
-
-        await ctx.send("Entry successfully removed from wheel.")
+        await ctx.send("Entries successfully updated.")
 
     @client.command(
         name="wheel spin",
@@ -208,7 +175,7 @@ class Wheel(client.Plugin):
             ),
         ]
     )
-    async def wheel_spin(self, ctx: n.types.CommandI, name: str) -> None:
+    async def wheel_spin(self, ctx: t.CommandI, name: str) -> None:
         """
         Gets a random result from a given wheel.
         """
@@ -248,7 +215,7 @@ class Wheel(client.Plugin):
         )
 
     @client.event.filtered_component("WHEEL SPIN ")
-    async def on_wheel_button_press(self, ctx: n.types.ComponentI) -> None:
+    async def on_wheel_button_press(self, ctx: t.ComponentI) -> None:
         """
         Handles wheel spin button presses.
         """
@@ -258,7 +225,7 @@ class Wheel(client.Plugin):
     @client.command(
             name="wheel list",
     )
-    async def wheel_list(self, ctx: n.types.CommandI) -> None:
+    async def wheel_list(self, ctx: t.CommandI) -> None:
         """
         Lists all of your wheels.
         """
@@ -278,28 +245,6 @@ class Wheel(client.Plugin):
             for i in stuff:
                 output += i + ", "
         return output
-
-    @client.command(
-        name="wheel entries",
-        options=[
-            n.ApplicationCommandOption(
-                name="name",
-                description="The name of the wheel to list entries from.??",
-                type=n.ApplicationOptionType.STRING,
-                autocomplete=True
-            )
-        ]
-    )
-    async def wheel_entries(self, ctx: n.types.CommandI, name: str) -> None:
-        """
-        List all of the entries within a wheel.
-        """
-
-        entries = await self.get_wheel_entries(ctx.user.id, name)
-        await ctx.send(
-            self.prettify_list_uwu(entries),
-            allowed_mentions=n.AllowedMentions.none(),
-        )
 
     async def get_user_wheels(self, user_id: int) -> list[str]:
         async with db.Database.acquire() as conn:
@@ -353,20 +298,3 @@ class Wheel(client.Plugin):
         return [
             n.ApplicationCommandChoice(name) for name in wheels
         ]
-
-    @add_entry.autocomplete
-    @remove_entry.autocomplete
-    async def wheel_entries_autocomplete(
-            self,
-            ctx: n.Interaction[n.ApplicationCommandData]) -> list[n.ApplicationCommandChoice]:
-        self.log.info(ctx.data.options)
-        focused = [i for i in ctx.data.options[0].options if i.focused][0]
-        name_of_focused_option = focused.name
-        if name_of_focused_option == "name":
-            return await self.wheel_name_autocomplete(ctx)
-        elif name_of_focused_option == "entry":
-            user_id = ctx.user.id
-            entries = await self.get_wheel_entries(user_id, ctx.data.options[0].options[0].value)
-            return [
-                n.ApplicationCommandChoice(entry) for entry in entries
-            ]
