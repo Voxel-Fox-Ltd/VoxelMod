@@ -40,8 +40,8 @@ class Animals(client.Plugin):
         """
 
         headers = {
-            "User-Agent": self.bot.config.api_keys._user_agent,
-            "x-api-key": self.bot.config.api_keys.cat_api_key,
+            "User-Agent": self.bot.config.api_keys["_user_agent"],
+            "x-api-key": self.bot.config.api_keys["cat_api_key"],
         }
         params = {
             "limit": 1
