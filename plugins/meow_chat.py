@@ -82,7 +82,7 @@ class MeowChat(client.Plugin):
         ":nyah:",
         ":sadcat:",
         ":sadcatcowboy:",
-        ":sadcatcscream:",
+        ":sadcatscream:",
         ":sadcatthumbsup:",
         ":blobsatstab:",
         ":blobsatsransseart:",
