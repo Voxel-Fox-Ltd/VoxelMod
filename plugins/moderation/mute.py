@@ -164,5 +164,5 @@ class Mute(client.Plugin):
         # Send a confirmation message
         await interaction.send(
             "**{user}** has been unmuted :3c"
-            .format()
+            .format(user=user.mention)
         )
