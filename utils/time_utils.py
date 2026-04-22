@@ -17,8 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import timedelta, datetime as dt
 import re
+
+from novus.utils import utcnow, parse_timestamp
 
 
 __all__ = (
@@ -52,13 +54,20 @@ def get_datetime_until(time: str, default_days: int | None = 28) -> timedelta:
 
     # Matches any digit followed by any of s, m, h, d, or y (seconds, month, hours, days, or year)
     pattern = r"(?:(?P<length>\d+)(?P<period>[smhdy]) *)"
+    timestamp_pattern = r"<t:(\d+)(?::[FfDdtTRsS])?>"
 
     # If no match is found, the default time is 28 days
     if not re.match(f"^{pattern}+$", time):
-        if default_days is not None:
-            return timedelta(days=default_days)
+        if (matched_timestamp := re.match(f"^{timestamp_pattern}$", time)):
+            future_timestamp = matched_timestamp.group(1)
+            future = parse_timestamp(dt.utcfromtimestamp(int(future_timestamp))) - utcnow()
+            return future
         else:
-            raise ValueError("Invalid time was given (%s)" % time)
+            if default_days is not None:
+                return timedelta(days=default_days)
+            else:
+                raise ValueError("Invalid time was given (%s)" % time)
+
 
     # Get the matches from the string
     matches = re.finditer(pattern, time.replace(' ', '').lower())
