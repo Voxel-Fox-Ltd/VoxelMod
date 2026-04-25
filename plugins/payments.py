@@ -74,6 +74,45 @@ class Payments(client.Plugin):
         return await self.purchases_list_generic(ctx, conn, user_rows)
 
     @client.command(
+        name="purchases list guild",
+        options=[
+            n.ApplicationCommandOption(
+                name="guild_id",
+                description="The ID of the guild you want to check.",
+                type=n.ApplicationOptionType.STRING,
+            ),
+        ],
+        dm_permission=False,
+        default_member_permissions=n.Permissions(manage_channels=True),
+        guild_ids=[int(os.getenv("MAIN_GUILD_ID", 0))],
+    )
+    async def purchases_list_guild(self, ctx: n.types.CommandI, guild_id: str):
+        """
+        Get the purchases for a given guild.
+        """
+
+        conn = await self.get_connection()
+        user_rows = await conn.fetch(
+            """
+            SELECT
+                *
+            FROM
+                users
+            LEFT JOIN
+                purchases
+            ON
+                users.id = purchases.user_id
+            WHERE
+                purchases.discord_guild_id = $1
+            """,
+            int(guild_id),
+        )
+        if not user_rows:
+            await conn.close()
+            return await ctx.send(f"No purchase or VFL account found.")
+        return await self.purchases_list_generic(ctx, conn, user_rows)
+
+    @client.command(
         name="purchases list id",
         options=[
             n.ApplicationCommandOption(
