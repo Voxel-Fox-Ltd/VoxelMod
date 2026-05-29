@@ -31,13 +31,12 @@ class Animals(client.Plugin):
     """
 
     @client.command(
-        name="cat",
         integration_types=[
             n.ApplicationIntegrationType.GUILD_INSTALL,
             n.ApplicationIntegrationType.USER_INSTALL,
         ],
     )
-    async def cat(self, ctx: n.types.CommandI):
+    async def cat(self, ctx: t.CommandI) -> None:
         """
         Post a random cat image.
         """
@@ -62,5 +61,25 @@ class Animals(client.Plugin):
         embed = (
             n.Embed(color=random.randint(1, 0xFFFFFF))
             .set_image(data[0]["url"])
+        )
+        await ctx.send(embeds=[embed])
+
+    @client.command(
+        integration_types=[
+            n.ApplicationIntegrationType.GUILD_INSTALL,
+            n.ApplicationIntegrationType.USER_INSTALL,
+        ],
+    )
+    async def fox(self, ctx: t.CommandI) -> None:
+        """
+        Post a random fox image.
+        """
+
+        async with aiohttp.ClientSession() as session:
+            r = await session.get("https://randomfox.ca/floof/")
+            data = await r.json()
+        embed = (
+            n.Embed(color=random.randint(1, 0xFFFFFF))
+            .set_image(data["image"])
         )
         await ctx.send(embeds=[embed])
