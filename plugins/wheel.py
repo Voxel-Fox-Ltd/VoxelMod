@@ -27,6 +27,14 @@ import asyncpg
 
 class Wheel(client.Plugin):
 
+    wheel = client.CommandDescription(
+        "Spin a wheel of multiple options.",
+        integration_types=[
+            n.ApplicationIntegrationType.GUILD_INSTALL,
+            n.ApplicationIntegrationType.USER_INSTALL,
+        ],
+    )
+
     @client.command(
         name="wheel create",
         options=[

@@ -25,6 +25,15 @@ from utils import get_datetime_until
 
 class Reminders(client.Plugin):
 
+    reminder = client.CommandDescription(
+        "Create and manage reminders.",
+        integration_types=[
+            n.ApplicationIntegrationType.GUILD_INSTALL,
+            n.ApplicationIntegrationType.USER_INSTALL,
+        ],
+        dm_permission=True,
+    )
+
     @client.command(
         name="reminder create",
         options=[
@@ -39,7 +48,6 @@ class Reminders(client.Plugin):
                 type=n.ApplicationOptionType.STRING,
             ),
         ],
-        dm_permission=False,
     )
     async def create_reminder(self, ctx: n.types.CommandGI, reminder: str, time: str) -> None:
         """
@@ -76,7 +84,7 @@ class Reminders(client.Plugin):
                 reminder_time.naive,
                 ctx.user.id,
                 ctx.channel.id,
-                ctx.guild.id
+                ctx.guild.id if ctx.guild is not None else 0
             )
 
         await ctx.send(
@@ -100,7 +108,6 @@ class Reminders(client.Plugin):
                 autocomplete=True,
             ),
         ],
-        dm_permission=False,
     )
     async def delete_reminder(self, ctx: n.types.CommandI, reminder: str) -> None:
         """
@@ -152,16 +159,22 @@ class Reminders(client.Plugin):
         # Send expired reminders out to the user
         for row in rows:
 
-            # Make a fake guild so that we can get the user and channel
+            # Make a fake guild so that we can get the user and channel if necessary
             reminder = row["reminder_name"]
             channel = n.Channel.partial(self.state, row["message_channel_id"])
-            fake_guild = n.Object(row["guild_id"], state=self.state)
+            if row["guild_id"] is None or row["guild_id"] == 0:
+                fake_guild = None
+            else:
+                fake_guild = n.Object(row["guild_id"], state=self.state)
 
             # Make sure the user is in the server
-            try:
-                member = await n.Guild.fetch_member(fake_guild, row["user_id"])
-            except n.NotFound:
-                continue
+            if fake_guild is not None:
+                try:
+                    member = await n.Guild.fetch_member(fake_guild, row["user_id"])
+                except n.NotFound:
+                    continue
+            else:
+                member = n.Object(row["user_id"], state=self.state)
 
             # Try and send the reminder
             try:

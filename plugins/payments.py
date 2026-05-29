@@ -168,15 +168,15 @@ class Payments(client.Plugin):
         if not user_rows:
             await conn.close()
             return await ctx.send(
-                f"There is no VFL account with the ID `{id}`.", 
+                f"There is no VFL account with the ID `{id}`.",
                 allowed_mentions=n.AllowedMentions.none(),
             )
         return await self.purchases_list_generic(ctx, conn, user_rows)
 
     async def purchases_list_generic(
-            self, 
-            ctx: t.CommandI, 
-            conn: asyncpg.Connection, 
+            self,
+            ctx: t.CommandI,
+            conn: asyncpg.Connection,
             user_rows: list[dict]) -> None:
         """
         Generic purchase list handling when given rows.

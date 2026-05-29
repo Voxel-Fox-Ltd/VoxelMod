@@ -51,7 +51,10 @@ class MeowChat(client.Plugin):
         "rawr",
         "yip",
         "mlem",
-        re.compile(r"\bmrr+p\b", re.IGNORECASE),
+        re.compile(r"\bm+r+p\b", re.IGNORECASE),
+        re.compile(r"\bm+r+o+w+\b", re.IGNORECASE),
+        re.compile(r"\bm+e+o+w+\b", re.IGNORECASE),
+
         # emotes!
         "🐱",
         "😿",
@@ -63,6 +66,7 @@ class MeowChat(client.Plugin):
         "😸",
         "😺",
         "😼",
+
         # VFL custom emotes :3
         ":catgun_cato:",
         ":catlipbite:",

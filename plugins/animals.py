@@ -32,7 +32,10 @@ class Animals(client.Plugin):
 
     @client.command(
         name="cat",
-        dm_permission=True,
+        integration_types=[
+            n.ApplicationIntegrationType.GUILD_INSTALL,
+            n.ApplicationIntegrationType.USER_INSTALL,
+        ],
     )
     async def cat(self, ctx: n.types.CommandI):
         """
