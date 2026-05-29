@@ -30,13 +30,31 @@ from novus.ext import client
 dotenv.load_dotenv()
 
 
+class TempConnection:
+
+    def __init__(self, dsn: str):
+        self.dsn = dsn
+        self.conn = None
+
+    async def __aenter__(self) -> asyncpg.Connection:
+        self.conn = await asyncpg.connect(self.dsn)
+        return self.conn
+
+    async def __aexit__(self, *_) -> None:
+        assert self.conn is not None
+        await self.conn.close()
+
+
 class Payments(client.Plugin):
     """
     For handling Voxel Fox website payment processing.
     """
 
-    async def get_connection(self) -> asyncpg.Connection:
+    async def get_vfl_connection(self) -> asyncpg.Connection:
         return await asyncpg.connect(self.bot.config.vfl_database_dsn)
+
+    async def get_mb_connection(self) -> asyncpg.Connection:
+        return await asyncpg.connect(self.bot.config.mb_database_dsn)
 
     @client.command(
         name="purchases list user",
@@ -56,7 +74,7 @@ class Payments(client.Plugin):
         Get the purchases for a given user.
         """
 
-        conn = await self.get_connection()
+        conn = await self.get_vfl_connection()
         user_rows = await conn.fetch(
             """
             SELECT
@@ -91,7 +109,7 @@ class Payments(client.Plugin):
         Get the purchases for a given guild.
         """
 
-        conn = await self.get_connection()
+        conn = await self.get_vfl_connection()
         user_rows = await conn.fetch(
             """
             SELECT
@@ -135,7 +153,7 @@ class Payments(client.Plugin):
         except Exception:
             return await ctx.send("Bad format for ID.", ephemeral=True)
 
-        conn = await self.get_connection()
+        conn = await self.get_vfl_connection()
         user_rows = await conn.fetch(
             """
             SELECT
@@ -213,10 +231,12 @@ class Payments(client.Plugin):
         for r in purchase_rows:
             ts = n.utils.parse_timestamp(r['timestamp'])
             identifier = r['identifier']
+            url = "https://dashboard.stripe.com/search?query="
             if identifier.startswith("sub_"):
-                identifier = f"[{identifier}](https://dashboard.stripe.com/subscriptions/{identifier})"
+                url = "https://dashboard.stripe.com/subscriptions/"
             elif identifier.startswith("in_"):
-                identifier = f"[{identifier}](https://dashboard.stripe.com/invoices/{identifier})"
+                url = "https://dashboard.stripe.com/invoices/"
+            identifier = f"[{identifier}]({url}{identifier})"
             lines = [
                 f"* **ID**\n  {r['id']}",
                 f"* **Timestamp**\n\u200b  {ts.format(n.TimestampFormat.LONG_DATETIME)}",
@@ -237,4 +257,3 @@ class Payments(client.Plugin):
             user_embed,
             purchases_embed,
         ])
-

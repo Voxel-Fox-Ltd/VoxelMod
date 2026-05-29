@@ -437,10 +437,11 @@ class CustomRole(client.Plugin):
         necessary.
         """
 
-        # See if they had a custom role before and don't now
-        pass
+        # See if they had the custom role required role before and don't now
+        async with db.Database.acquire() as conn:
+            pass
 
-        # If so, delete role
+        # If so, delete their custom role
         pass
 
     @client.event.guild_member_remove
