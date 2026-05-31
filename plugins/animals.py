@@ -83,3 +83,43 @@ class Animals(client.Plugin):
             .set_image(data["image"])
         )
         await ctx.send(embeds=[embed])
+
+    @client.command(
+        integration_types=[
+            n.ApplicationIntegrationType.GUILD_INSTALL,
+            n.ApplicationIntegrationType.USER_INSTALL,
+        ],
+    )
+    async def duck(self, ctx: t.CommandI) -> None:
+        """
+        Post a random duck image.
+        """
+
+        async with aiohttp.ClientSession() as session:
+            r = await session.get("https://random-d.uk/api/v2/random")
+            data = await r.json()
+        embed = (
+            n.Embed(color=random.randint(1, 0xFFFFFF))
+            .set_image(data["url"])
+        )
+        await ctx.send(embeds=[embed])
+
+    @client.command(
+        integration_types=[
+            n.ApplicationIntegrationType.GUILD_INSTALL,
+            n.ApplicationIntegrationType.USER_INSTALL,
+        ],
+    )
+    async def doig(self, ctx: t.CommandI) -> None:
+        """
+        Post a random dog image.
+        """
+
+        async with aiohttp.ClientSession() as session:
+            r = await session.get("https://random.dog/woof.json")
+            data = await r.json()
+        embed = (
+            n.Embed(color=random.randint(1, 0xFFFFFF))
+            .set_image(data["url"])
+        )
+        await ctx.send(embeds=[embed])
