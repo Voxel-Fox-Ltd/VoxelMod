@@ -168,6 +168,7 @@ class MeowChat(client.Plugin):
                 required=False,
             ),
         ],
+        default_member_permissions=n.Permissions(manage_messages=True),
         dm_permission=False,
     )
     async def enable_meowchat(self, ctx: t.CommandGI, time: str | None = None) -> None:
@@ -224,6 +225,7 @@ class MeowChat(client.Plugin):
 
     @client.command(
         "meow-chat disable",
+        default_member_permissions=n.Permissions(manage_messages=True),
         dm_permission=False,
     )
     async def disable_meowchat(self, ctx: t.CommandGI) -> None:
